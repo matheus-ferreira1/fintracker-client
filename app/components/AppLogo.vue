@@ -1,14 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   collapsed?: boolean
 }>()
-
-watch(
-  () => props.collapsed,
-  (newVal) => {
-    console.log(newVal)
-  }
-)
 </script>
 
 <template>
