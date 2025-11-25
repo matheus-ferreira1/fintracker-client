@@ -25,7 +25,8 @@ const fields = [
     name: 'password',
     label: 'Password',
     type: 'password' as const,
-    placeholder: 'Enter your password'
+    placeholder: 'Enter your password',
+    required: true
   }
 ]
 
