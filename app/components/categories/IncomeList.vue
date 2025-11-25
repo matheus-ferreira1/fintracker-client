@@ -1,0 +1,216 @@
+<script setup lang="ts">
+import type { Category } from '~/types/category'
+
+const { loading, error, fetchCategories, createCategory, updateCategory, deleteCategory, getCategoriesByType } = useCategories()
+
+const toast = useToast()
+
+const createModalOpen = ref(false)
+const editModalOpen = ref(false)
+const selectedCategory = ref<Category | undefined>()
+
+onMounted(async () => {
+  await fetchCategories()
+})
+
+const incomeCategories = computed(() => getCategoriesByType('income'))
+
+async function handleCreate(name: string, color: string, type: 'income' | 'expense') {
+  try {
+    await createCategory(name, color, type)
+    toast.add({
+      title: 'Success',
+      description: 'Category created successfully',
+      color: 'success',
+      icon: 'i-lucide-check'
+    })
+    createModalOpen.value = false
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to create category',
+      color: 'error',
+      icon: 'i-lucide-x'
+    })
+  }
+}
+
+function openEditModal(category: Category) {
+  selectedCategory.value = category
+  editModalOpen.value = true
+}
+
+async function handleUpdate(id: string, name: string, color: string) {
+  try {
+    await updateCategory(id, name, color)
+    toast.add({
+      title: 'Success',
+      description: 'Category updated successfully',
+      color: 'success',
+      icon: 'i-lucide-check'
+    })
+    editModalOpen.value = false
+    selectedCategory.value = undefined
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to update category',
+      color: 'error',
+      icon: 'i-lucide-x'
+    })
+  }
+}
+
+async function confirmDelete(categoryIDToDelete: string) {
+  try {
+    await deleteCategory(categoryIDToDelete)
+    toast.add({
+      title: 'Success',
+      description: 'Category deleted successfully',
+      color: 'success',
+      icon: 'i-lucide-check'
+    })
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to delete category',
+      color: 'error',
+      icon: 'i-lucide-x'
+    })
+  }
+}
+
+watch(editModalOpen, (isOpen) => {
+  if (!isOpen) {
+    selectedCategory.value = undefined
+  }
+})
+</script>
+
+<template>
+  <div class="mt-4 space-y-4">
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+        Income Categories
+      </h3>
+      <UButton
+        label="Add Category"
+        icon="i-lucide-plus"
+        color="primary"
+        variant="solid"
+        size="sm"
+        @click="createModalOpen = true"
+      />
+    </div>
+
+    <div
+      v-if="loading && incomeCategories.length === 0"
+      class="flex justify-center items-center py-12"
+    >
+      <UIcon
+        name="i-lucide-loader-2"
+        class="w-6 h-6 animate-spin text-gray-400"
+      />
+    </div>
+
+    <div
+      v-else-if="error"
+      class="text-center py-12"
+    >
+      <p class="text-red-500 dark:text-red-400">
+        Failed to load categories. Please try again.
+      </p>
+    </div>
+
+    <div
+      v-else-if="incomeCategories.length === 0"
+      class="text-center py-12"
+    >
+      <UIcon
+        name="i-lucide-folder-open"
+        class="w-12 h-12 mx-auto mb-4 text-gray-400"
+      />
+      <p class="text-gray-500 dark:text-gray-400 mb-4">
+        No income categories yet
+      </p>
+      <UButton
+        label="Create Your First Category"
+        icon="i-lucide-plus"
+        color="primary"
+        variant="solid"
+        @click="createModalOpen = true"
+      />
+    </div>
+
+    <div
+      v-else
+      class="space-y-2"
+    >
+      <div
+        v-for="category in incomeCategories"
+        :key="category.id"
+        class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+      >
+        <div class="flex items-center gap-3 flex-1">
+          <div
+            class="w-3 h-3 rounded-full shrink-0"
+            :style="{ backgroundColor: category.color }"
+            :aria-label="`Category color: ${category.color}`"
+          />
+          <span class="font-medium text-gray-900 dark:text-white">
+            {{ category.name }}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <UBadge
+            v-if="category.isDefault"
+            label="Default"
+            color="neutral"
+            variant="subtle"
+            size="sm"
+          />
+
+          <div
+            v-if="!category.isDefault"
+            class="flex items-center gap-1"
+          >
+            <UButton
+              icon="i-lucide-pencil"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              aria-label="Edit category"
+              @click="openEditModal(category)"
+            />
+            <CategoriesDeleteModal
+              :category="category"
+              @confirm="() => confirmDelete(category.id)"
+            >
+              <UButton
+                icon="i-lucide-trash"
+                color="error"
+                variant="ghost"
+                size="sm"
+                aria-label="Delete category"
+              />
+            </CategoriesDeleteModal>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <CategoriesCategoryModal
+      v-model:open="createModalOpen"
+      type="income"
+      @submit="handleCreate"
+    />
+
+    <CategoriesCategoryModal
+      v-model:open="editModalOpen"
+      type="income"
+      :category="selectedCategory"
+      @update="handleUpdate"
+    />
+  </div>
+</template>
