@@ -6,7 +6,7 @@ defineProps<{
 }>()
 
 const colorMode = useColorMode()
-const toast = useToast()
+const { logout } = useAuth()
 
 const user = ref({
   name: 'Benjamin Canac',
@@ -68,11 +68,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
 ])
 
 const handleLogout = async () => {
-  // TODO: Implement logout
-  toast.add({
-    title: 'Logged out!'
-  })
-  navigateTo('/')
+  await logout()
 }
 </script>
 

@@ -1,4 +1,6 @@
+import type { ApiResponse } from '~/types/api.types'
 import type { LoginPayload, RegisterPayload } from '~/types/auth.types'
+import type { User } from '~/types/user.types'
 
 export function useAuth() {
   const { $api } = useNuxtApp()
@@ -9,7 +11,7 @@ export function useAuth() {
   async function register(payload: RegisterPayload) {
     isLoading.value = true
     try {
-      await $api('/auth/register', {
+      await $api<ApiResponse<User>>('/auth/register', {
         method: 'POST',
         body: payload
       })
@@ -18,7 +20,6 @@ export function useAuth() {
       })
       navigateTo('/dashboard')
     } catch (err) {
-      console.log(err)
       toast.add({
         title: 'Something went wrong',
         description: parseApiError(err),
@@ -32,7 +33,7 @@ export function useAuth() {
   async function login(payload: LoginPayload) {
     isLoading.value = true
     try {
-      await $api('/auth/login', {
+      await $api<ApiResponse<User>>('/auth/login', {
         method: 'POST',
         body: payload
       })
@@ -41,7 +42,6 @@ export function useAuth() {
       })
       navigateTo('/dashboard')
     } catch (err) {
-      console.log(err)
       toast.add({
         title: 'Something went wrong',
         description: parseApiError(err),
@@ -63,7 +63,6 @@ export function useAuth() {
       })
       navigateTo('/login')
     } catch (err) {
-      console.log(err)
       toast.add({
         title: 'Something went wrong',
         description: parseApiError(err),
