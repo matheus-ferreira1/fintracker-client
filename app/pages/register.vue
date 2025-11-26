@@ -11,7 +11,7 @@ useSeoMeta({
   description: 'Create an account to get started'
 })
 
-// const toast = useToast();
+const { pending, register } = useAuth()
 
 const fields = [
   {
@@ -43,7 +43,7 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 function onSubmit(payload: FormSubmitEvent<Schema>) {
-  console.log('Submitted', payload)
+  register(payload.data)
 }
 </script>
 
@@ -51,6 +51,7 @@ function onSubmit(payload: FormSubmitEvent<Schema>) {
   <UAuthForm
     :fields="fields"
     :schema="schema"
+    :loading="pending"
     title="Create an account"
     :submit="{ label: 'Create account' }"
     @submit="onSubmit"

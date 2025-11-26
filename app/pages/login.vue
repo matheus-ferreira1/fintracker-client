@@ -11,7 +11,7 @@ useSeoMeta({
   description: 'Login to your account to continue'
 })
 
-const toast = useToast()
+const { pending, login } = useAuth()
 
 const fields = [
   {
@@ -38,15 +38,7 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 function onSubmit(payload: FormSubmitEvent<Schema>) {
-  if (
-    payload.data.email === 'test@test.com'
-    && payload.data.password === 'teste123'
-  ) {
-    toast.add({
-      title: 'Welcome Back!'
-    })
-    navigateTo('/dashboard')
-  }
+  login(payload.data)
 }
 </script>
 
@@ -56,6 +48,7 @@ function onSubmit(payload: FormSubmitEvent<Schema>) {
     :schema="schema"
     title="Welcome back"
     icon="i-lucide-lock"
+    :loading="pending"
     @submit="onSubmit"
   >
     <template #description>
