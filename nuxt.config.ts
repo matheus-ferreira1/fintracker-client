@@ -11,8 +11,18 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  runtimeConfig: {
+    public: {
+      apiUrl: process.env.NUXT_PUBLIC_API_BASE
+    }
+  },
+
   routeRules: {
     '/': { prerender: true }
+  },
+
+  devServer: {
+    port: 3001
   },
 
   compatibilityDate: '2025-01-15',
