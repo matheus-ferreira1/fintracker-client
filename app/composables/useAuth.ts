@@ -5,6 +5,7 @@ import type { User } from '~/types/user.types'
 export function useAuth() {
   const { $api } = useNuxtApp()
   const toast = useToast()
+  const route = useRoute()
 
   const isLoading = shallowRef(false)
 
@@ -18,7 +19,9 @@ export function useAuth() {
       toast.add({
         title: 'Account created successfully!'
       })
-      navigateTo('/dashboard')
+
+      const redirectTo = (route.query.redirect as string) || '/dashboard'
+      navigateTo(redirectTo)
     } catch (err) {
       toast.add({
         title: 'Something went wrong',
@@ -40,7 +43,9 @@ export function useAuth() {
       toast.add({
         title: 'Login successful!'
       })
-      navigateTo('/dashboard')
+
+      const redirectTo = (route.query.redirect as string) || '/dashboard'
+      navigateTo(redirectTo)
     } catch (err) {
       toast.add({
         title: 'Something went wrong',
@@ -73,10 +78,38 @@ export function useAuth() {
     }
   }
 
+  /**
+   * Check if the user is currently authenticated
+   * This method makes an API call to verify the session
+   */
+  async function checkAuth(): Promise<boolean> {
+    try {
+      await $api('/auth/me')
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Get the current authenticated user
+   * Returns null if not authenticated
+   */
+  async function getCurrentUser(): Promise<User | null> {
+    try {
+      const response = await $api<ApiResponse<User>>('/auth/me')
+      return response.data
+    } catch {
+      return null
+    }
+  }
+
   return {
     pending: readonly(isLoading),
     register,
     login,
-    logout
+    logout,
+    checkAuth,
+    getCurrentUser
   }
 }
