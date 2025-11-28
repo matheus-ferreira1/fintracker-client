@@ -11,7 +11,6 @@ const links = [
       to: '/dashboard',
       onSelect: () => {
         open.value = false
-        console.log('clicou no dashboard')
       }
     },
     {
