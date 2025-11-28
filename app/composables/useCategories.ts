@@ -1,4 +1,4 @@
-import type { Category, CategoryType } from '~/types/category'
+import type { Category, CategoryType } from '~/types/category.types'
 
 async function fetchCategoriesFromAPI(): Promise<Category[]> {
   await new Promise(resolve => setTimeout(resolve, 300))

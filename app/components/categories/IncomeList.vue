@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Category } from '~/types/category'
+import type { Category } from '~/types/category.types'
 
 const { loading, error, fetchCategories, createCategory, updateCategory, deleteCategory, getCategoriesByType } = useCategories()
 
