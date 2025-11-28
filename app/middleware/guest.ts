@@ -3,13 +3,17 @@ export default defineNuxtRouteMiddleware(async () => {
     return
   }
 
-  const { $api } = useNuxtApp()
+  const authStore = useAuthStore()
+  const toast = useToast()
 
-  try {
-    await $api('/auth/me')
+  if (!authStore.isInitialized) {
+    await authStore.initialize()
+  }
 
+  if (authStore.isAuthenticated) {
+    toast.add({
+      title: 'Welcome back!'
+    })
     return navigateTo('/dashboard')
-  } catch {
-    return
   }
 })

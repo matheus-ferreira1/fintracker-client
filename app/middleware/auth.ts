@@ -3,16 +3,16 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  useNuxtApp()
+  const authStore = useAuthStore()
   const toast = useToast()
-  const { checkAuthAndGetUser } = useAuth()
 
-  try {
-    checkAuthAndGetUser()
-  } catch (err) {
+  if (!authStore.isInitialized) {
+    await authStore.initialize()
+  }
+
+  if (!authStore.isAuthenticated) {
     toast.add({
       title: 'Please login to continue',
-      description: parseApiError(err),
       color: 'error'
     })
 

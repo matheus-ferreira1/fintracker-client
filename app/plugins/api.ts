@@ -9,6 +9,9 @@ export default defineNuxtPlugin((nuxtApp) => {
     },
     async onResponseError({ response }) {
       if (response.status === 401) {
+        const authStore = useAuthStore()
+        authStore.clearUser()
+
         await nuxtApp.runWithContext(() => navigateTo('/login'))
       }
 
