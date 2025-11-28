@@ -6,13 +6,25 @@ defineProps<{
 }>()
 
 const colorMode = useColorMode()
-const { logout } = useAuth()
+const { user, userInitials, pending, logout } = useAuth()
 
-const user = ref({
-  name: 'Benjamin Canac',
-  avatar: {
-    src: 'https://github.com/benjamincanac.png',
-    alt: 'Benjamin Canac'
+const isLoading = computed(() => pending.value || !user.value)
+
+const userDisplay = computed(() => {
+  if (!user.value) {
+    return {
+      name: '',
+      avatar: {
+        text: ''
+      }
+    }
+  }
+
+  return {
+    name: user.value.name,
+    avatar: {
+      text: userInitials.value
+    }
   }
 })
 
@@ -20,8 +32,8 @@ const items = computed<DropdownMenuItem[][]>(() => [
   [
     {
       type: 'label',
-      label: user.value.name,
-      avatar: user.value.avatar
+      label: userDisplay.value.name,
+      avatar: userDisplay.value.avatar
     }
   ],
   [
@@ -73,7 +85,27 @@ const handleLogout = async () => {
 </script>
 
 <template>
+  <div v-if="isLoading">
+    <div
+      v-if="collapsed"
+      class="flex items-center justify-center p-2"
+    >
+      <USkeleton class="size-8 rounded-md" />
+    </div>
+    <div
+      v-else
+      class="flex items-center gap-2 px-2 py-1.5 rounded-md"
+    >
+      <USkeleton class="size-8 rounded-md shrink-0" />
+      <div class="flex-1 flex items-center gap-2 min-w-0">
+        <USkeleton class="h-4 w-24" />
+        <USkeleton class="size-4 shrink-0 ml-auto" />
+      </div>
+    </div>
+  </div>
+
   <UDropdownMenu
+    v-else
     :items="items"
     :content="{ align: 'center', collisionPadding: 12 }"
     :ui="{
@@ -82,8 +114,8 @@ const handleLogout = async () => {
   >
     <UButton
       v-bind="{
-        ...user,
-        label: collapsed ? undefined : user?.name,
+        ...userDisplay,
+        label: collapsed ? undefined : userDisplay.name,
         trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
       }"
       color="neutral"

@@ -3,11 +3,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  const { $api } = useNuxtApp()
+  useNuxtApp()
   const toast = useToast()
+  const { checkAuthAndGetUser } = useAuth()
 
   try {
-    await $api('/auth/me')
+    checkAuthAndGetUser()
   } catch (err) {
     toast.add({
       title: 'Please login to continue',
