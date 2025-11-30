@@ -1,83 +1,30 @@
 <script setup lang="ts">
-import type { Category } from '~/types/category.types'
+import { CategoryTypeEnum, type Category } from '~/types/category.types'
 
-const { loading, error, fetchCategories, createCategory, updateCategory, deleteCategory, getCategoriesByType } = useCategories()
-
-const toast = useToast()
+const { categories, loading, error, createCategory, updateCategory, deleteCategory } = useCategories(CategoryTypeEnum.EXPENSE)
 
 const createModalOpen = ref(false)
 const editModalOpen = ref(false)
 const selectedCategory = ref<Category | undefined>()
-
-onMounted(async () => {
-  await fetchCategories()
-})
-
-const expenseCategories = computed(() => getCategoriesByType('expense'))
-
-async function handleCreate(name: string, color: string, type: 'income' | 'expense') {
-  try {
-    await createCategory(name, color, type)
-    toast.add({
-      title: 'Success',
-      description: 'Category created successfully',
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
-    createModalOpen.value = false
-  } catch {
-    toast.add({
-      title: 'Error',
-      description: 'Failed to create category',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  }
-}
 
 function openEditModal(category: Category) {
   selectedCategory.value = category
   editModalOpen.value = true
 }
 
-async function handleUpdate(id: string, name: string, color: string) {
-  try {
-    await updateCategory(id, name, color)
-    toast.add({
-      title: 'Success',
-      description: 'Category updated successfully',
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
-    editModalOpen.value = false
-    selectedCategory.value = undefined
-  } catch {
-    toast.add({
-      title: 'Error',
-      description: 'Failed to update category',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  }
+async function handleCreate(name: string, color: string, type: 'income' | 'expense') {
+  await createCategory({ name, color, type })
+  createModalOpen.value = false
 }
 
-async function confirmDelete(categoryIDToDelete: string) {
-  try {
-    await deleteCategory(categoryIDToDelete)
-    toast.add({
-      title: 'Success',
-      description: 'Category deleted successfully',
-      color: 'success',
-      icon: 'i-lucide-check'
-    })
-  } catch {
-    toast.add({
-      title: 'Error',
-      description: 'Failed to delete category',
-      color: 'error',
-      icon: 'i-lucide-x'
-    })
-  }
+async function handleUpdate(id: string, name: string, color: string) {
+  await updateCategory({ id, name, color })
+  editModalOpen.value = false
+  selectedCategory.value = undefined
+}
+
+async function handleConfirmDelete(categoryIDToDelete: string) {
+  await deleteCategory(categoryIDToDelete)
 }
 
 watch(editModalOpen, (isOpen) => {
@@ -91,7 +38,7 @@ watch(editModalOpen, (isOpen) => {
   <div class="mt-4 space-y-4">
     <div class="flex justify-between items-center">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        Expense Categories
+        Expenses Categories
       </h3>
       <UButton
         label="Add Category"
@@ -104,7 +51,7 @@ watch(editModalOpen, (isOpen) => {
     </div>
 
     <div
-      v-if="loading && expenseCategories.length === 0"
+      v-if="loading"
       class="flex justify-center items-center py-12"
     >
       <UIcon
@@ -123,7 +70,7 @@ watch(editModalOpen, (isOpen) => {
     </div>
 
     <div
-      v-else-if="expenseCategories.length === 0"
+      v-else-if="categories.length === 0"
       class="text-center py-12"
     >
       <UIcon
@@ -131,15 +78,8 @@ watch(editModalOpen, (isOpen) => {
         class="w-12 h-12 mx-auto mb-4 text-gray-400"
       />
       <p class="text-gray-500 dark:text-gray-400 mb-4">
-        No expense categories yet
+        No income categories yet
       </p>
-      <UButton
-        label="Create Your First Category"
-        icon="i-lucide-plus"
-        color="primary"
-        variant="solid"
-        @click="createModalOpen = true"
-      />
     </div>
 
     <div
@@ -147,7 +87,7 @@ watch(editModalOpen, (isOpen) => {
       class="space-y-2"
     >
       <div
-        v-for="category in expenseCategories"
+        v-for="category in categories"
         :key="category.id"
         class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
       >
@@ -164,7 +104,7 @@ watch(editModalOpen, (isOpen) => {
 
         <div class="flex items-center gap-2">
           <UBadge
-            v-if="category.isDefault"
+            v-if="category.is_default"
             label="Default"
             color="neutral"
             variant="subtle"
@@ -172,7 +112,7 @@ watch(editModalOpen, (isOpen) => {
           />
 
           <div
-            v-if="!category.isDefault"
+            v-if="!category.is_default"
             class="flex items-center gap-1"
           >
             <UButton
@@ -185,7 +125,7 @@ watch(editModalOpen, (isOpen) => {
             />
             <CategoriesDeleteModal
               :category="category"
-              @confirm="() => confirmDelete(category.id)"
+              @confirm="handleConfirmDelete(category.id)"
             >
               <UButton
                 icon="i-lucide-trash"

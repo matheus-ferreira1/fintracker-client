@@ -12,7 +12,6 @@ const emit = defineEmits<{
 const open = ref(false)
 
 async function onSubmit() {
-  await new Promise(resolve => setTimeout(resolve, 1000))
   emit('confirm')
   open.value = false
 }

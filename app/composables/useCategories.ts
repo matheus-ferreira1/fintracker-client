@@ -1,207 +1,101 @@
-import type { Category, CategoryType } from '~/types/category.types'
+import type { ApiResponse } from '~/types/api.types'
+import type { Category, CategoryTypeEnum, CreateCategoryInput, UpdateCategoryInput } from '~/types/category.types'
 
-async function fetchCategoriesFromAPI(): Promise<Category[]> {
-  await new Promise(resolve => setTimeout(resolve, 300))
+export function useCategories(type: CategoryTypeEnum) {
+  const toast = useToast()
+  const { $api } = useNuxtApp()
 
-  return [
-    {
-      id: '1',
-      name: 'Salary',
-      color: '#10b981',
-      isDefault: true,
-      type: 'income'
-    },
-    {
-      id: '2',
-      name: 'Freelance',
-      color: '#3b82f6',
-      isDefault: true,
-      type: 'income'
-    },
-    {
-      id: '3',
-      name: 'Investment',
-      color: '#8b5cf6',
-      isDefault: true,
-      type: 'income'
-    },
-    {
-      id: '4',
-      name: 'Business',
-      color: '#f59e0b',
-      isDefault: true,
-      type: 'income'
-    },
-    {
-      id: '5',
-      name: 'Gift',
-      color: '#ec4899',
-      isDefault: true,
-      type: 'income'
-    },
-    {
-      id: '6',
-      name: 'Bonus',
-      color: '#22c55e',
-      isDefault: false,
-      type: 'income'
-    },
-    {
-      id: '7',
-      name: 'Food & Dining',
-      color: '#ef4444',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '8',
-      name: 'Transportation',
-      color: '#0ea5e9',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '9',
-      name: 'Shopping',
-      color: '#d946ef',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '10',
-      name: 'Entertainment',
-      color: '#a855f7',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '11',
-      name: 'Bills & Utilities',
-      color: '#6366f1',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '12',
-      name: 'Health & Fitness',
-      color: '#14b8a6',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '13',
-      name: 'Housing',
-      color: '#f97316',
-      isDefault: true,
-      type: 'expense'
-    },
-    {
-      id: '14',
-      name: 'Pet Care',
-      color: '#84cc16',
-      isDefault: false,
-      type: 'expense'
-    }
-  ]
-}
+  const isMutationLoading = ref(false)
+  const failed = ref(false)
 
-export function useCategories() {
-  const categories = ref<Category[]>([])
-  const loading = ref(false)
-  const error = ref<Error | null>(null)
+  const { data, pending, error: fetchError, refresh } = useAPI<ApiResponse<Category[]>>(`/categories?type=${type}`, { key: 'income-categories' })
+  const categories = computed(() => data.value?.data || [])
+  const error = computed(() => failed.value || fetchError.value)
 
-  async function fetchCategories() {
-    loading.value = true
-    error.value = null
-
-    try {
-      const data = await fetchCategoriesFromAPI()
-      categories.value = data
-    } catch (err) {
-      error.value
-        = err instanceof Error ? err : new Error('Failed to fetch categories')
-      console.error('Error fetching categories:', err)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const getCategoriesByType = (type: CategoryType): Category[] => {
-    return categories.value.filter(cat => cat.type === type)
-  }
+  const loading = computed(() => pending.value || isMutationLoading.value)
 
   async function createCategory(
-    name: string,
-    color: string,
-    type: CategoryType
+    payload: CreateCategoryInput
   ): Promise<void> {
-    loading.value = true
-    error.value = null
+    isMutationLoading.value = true
+    failed.value = false
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      const newCategory: Category = {
-        id: `temp-${Date.now()}`,
-        name,
-        color,
-        type,
-        isDefault: false
-      }
-
-      categories.value.push(newCategory)
+      await $api<ApiResponse<Category>>('/categories', {
+        method: 'POST',
+        body: payload,
+        async onResponse() {
+          await refresh()
+        }
+      })
+      toast.add({
+        title: 'Category created successfully!'
+      })
     } catch (err) {
-      error.value
-        = err instanceof Error ? err : new Error('Failed to create category')
-      throw error.value
+      failed.value = true
+      toast.add({
+        title: 'Something went wrong',
+        description: parseApiError(err),
+        color: 'error'
+      })
     } finally {
-      loading.value = false
+      isMutationLoading.value = false
     }
   }
 
   async function updateCategory(
-    id: string,
-    name: string,
-    color: string
+    data: UpdateCategoryInput
   ): Promise<void> {
-    loading.value = true
-    error.value = null
+    isMutationLoading.value = true
+    failed.value = false
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      const index = categories.value.findIndex(cat => cat.id === id)
-      if (index !== -1) {
-        const existingCategory = categories.value[index]!
-        categories.value.splice(index, 1, {
-          ...existingCategory,
-          name,
-          color
-        })
-      }
+      const { id, color, name } = data
+      await $api(`/categories/${id}`, {
+        method: 'PATCH',
+        body: { color, name },
+        async onResponse() {
+          await refresh()
+        }
+      })
+      toast.add({
+        title: 'Category updated successfully!'
+      })
     } catch (err) {
-      error.value
-        = err instanceof Error ? err : new Error('Failed to update category')
-      throw error.value
+      failed.value = true
+      toast.add({
+        title: 'Something went wrong',
+        description: parseApiError(err),
+        color: 'error'
+      })
     } finally {
-      loading.value = false
+      isMutationLoading.value = false
     }
   }
 
   async function deleteCategory(id: string): Promise<void> {
-    loading.value = true
-    error.value = null
+    isMutationLoading.value = true
+    failed.value = false
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
-
-      categories.value = categories.value.filter(cat => cat.id !== id)
+      await $api(`/categories/${id}`, {
+        method: 'DELETE',
+        async onResponse() {
+          await refresh()
+        }
+      })
+      toast.add({
+        title: 'Category deleted successfully!'
+      })
     } catch (err) {
-      error.value
-        = err instanceof Error ? err : new Error('Failed to delete category')
-      throw error.value
+      failed.value = true
+      toast.add({
+        title: 'Something went wrong',
+        description: parseApiError(err),
+        color: 'error'
+      })
     } finally {
-      loading.value = false
+      isMutationLoading.value = false
     }
   }
 
@@ -209,8 +103,6 @@ export function useCategories() {
     categories,
     loading,
     error,
-    fetchCategories,
-    getCategoriesByType,
     createCategory,
     updateCategory,
     deleteCategory
