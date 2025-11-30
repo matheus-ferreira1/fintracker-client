@@ -4,26 +4,45 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Too short'),
-  email: z.email('Invalid email'),
-  username: z.string().min(2, 'Too short')
+  email: z.email('Invalid email')
 })
 
 type ProfileSchema = z.output<typeof profileSchema>
 
-const profile = reactive<Partial<ProfileSchema>>({
-  name: 'Benjamin Canac',
-  email: 'ben@nuxtlabs.com',
-  username: 'benjamincanac'
-})
+const authStore = useAuthStore()
 const toast = useToast()
+
+const profile = reactive<Partial<ProfileSchema>>({
+  name: authStore.user?.name || '',
+  email: authStore.user?.email || ''
+})
+
+watch(
+  () => authStore.user,
+  (newUser) => {
+    if (newUser && !profile.name && !profile.email) {
+      profile.name = newUser.name
+      profile.email = newUser.email
+    }
+  },
+  { immediate: true }
+)
+
 async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
+  if (authStore.user) {
+    authStore.setUser({
+      ...authStore.user,
+      name: event.data.name,
+      email: event.data.email
+    })
+  }
+
   toast.add({
     title: 'Success',
     description: 'Your settings have been updated.',
     icon: 'i-lucide-check',
     color: 'success'
   })
-  console.log(event.data)
 }
 </script>
 
@@ -76,22 +95,6 @@ async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
         <UInput
           v-model="profile.email"
           type="email"
-          autocomplete="off"
-        />
-      </UFormField>
-
-      <USeparator />
-
-      <UFormField
-        name="username"
-        label="Username"
-        description="Your unique username for logging in and your profile URL."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-      >
-        <UInput
-          v-model="profile.username"
-          type="username"
           autocomplete="off"
         />
       </UFormField>
