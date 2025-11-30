@@ -8,7 +8,7 @@ const createModalOpen = ref(false)
 const editModalOpen = ref(false)
 const selectedCategory = ref<Category | undefined>()
 
-const { data, pending, error } = useAPI<ApiResponse<Category[]>>(`/categories?type=${CategoryTypeEnum.INCOME}`, { key: `${CategoryTypeEnum.INCOME}-categories`, cache: 'force-cache' })
+const { data, pending, error } = useAPI<ApiResponse<Category[]>>(`/categories?type=${CategoryTypeEnum.INCOME}`, { key: `${CategoryTypeEnum.INCOME}-categories` })
 const categories = computed(() => data.value?.data || [])
 
 function openEditModal(category: Category) {
