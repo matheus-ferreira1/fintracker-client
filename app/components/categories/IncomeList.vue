@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import type { ApiResponse } from '~/types/api.types'
 import { CategoryTypeEnum, type Category } from '~/types/category.types'
 
-const { categories, loading, error, createCategory, updateCategory, deleteCategory } = useCategories(CategoryTypeEnum.INCOME)
+const { createCategory, updateCategory, deleteCategory } = useCategories(CategoryTypeEnum.INCOME)
 
 const createModalOpen = ref(false)
 const editModalOpen = ref(false)
 const selectedCategory = ref<Category | undefined>()
+
+const { data, pending, error } = useAPI<ApiResponse<Category[]>>(`/categories?type=${CategoryTypeEnum.INCOME}`, { key: `${CategoryTypeEnum.INCOME}-categories`, cache: 'force-cache' })
+const categories = computed(() => data.value?.data || [])
 
 function openEditModal(category: Category) {
   selectedCategory.value = category
@@ -51,7 +55,7 @@ watch(editModalOpen, (isOpen) => {
     </div>
 
     <div
-      v-if="loading"
+      v-if="pending"
       class="flex justify-center items-center py-12"
     >
       <UIcon
