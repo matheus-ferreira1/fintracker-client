@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import * as z from 'zod'
+import type { ApiResponse } from '~/types/api.types'
+import type { User } from '~/types/user.types'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Too short'),
@@ -12,6 +14,13 @@ type ProfileSchema = z.output<typeof profileSchema>
 const authStore = useAuthStore()
 const toast = useToast()
 
+const isLoading = ref(false)
+
+const originalProfile = reactive<Partial<ProfileSchema>>({
+  name: authStore.user?.name || '',
+  email: authStore.user?.email || ''
+})
+
 const profile = reactive<Partial<ProfileSchema>>({
   name: authStore.user?.name || '',
   email: authStore.user?.email || ''
@@ -21,6 +30,8 @@ watch(
   () => authStore.user,
   (newUser) => {
     if (newUser && !profile.name && !profile.email) {
+      originalProfile.name = newUser.name
+      originalProfile.email = newUser.email
       profile.name = newUser.name
       profile.email = newUser.email
     }
@@ -28,27 +39,44 @@ watch(
   { immediate: true }
 )
 
-async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
-  if (authStore.user) {
-    authStore.setUser({
-      ...authStore.user,
-      name: event.data.name,
-      email: event.data.email
-    })
-  }
+const isFormDirty = computed(() => {
+  return (
+    profile.name !== originalProfile.name
+    || profile.email !== originalProfile.email
+  )
+})
 
-  toast.add({
-    title: 'Success',
-    description: 'Your settings have been updated.',
-    icon: 'i-lucide-check',
-    color: 'success'
-  })
+async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
+  const { $api } = useNuxtApp()
+  isLoading.value = true
+
+  try {
+    const user = await $api<ApiResponse<User>>('/auth/profile', {
+      method: 'PATCH',
+      body: event.data
+    })
+    authStore.setUser(user.data)
+
+    originalProfile.name = event.data.name
+    originalProfile.email = event.data.email
+
+    toast.add({
+      title: 'Profile information updated successfully!'
+    })
+  } catch (err) {
+    toast.add({
+      title: 'Something went wrong',
+      description: parseApiError(err),
+      color: 'error'
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
 <template>
   <UForm
-    id="settings"
     :schema="profileSchema"
     :state="profile"
     @submit="onSubmit"
@@ -61,11 +89,12 @@ async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
       class="mb-4"
     >
       <UButton
-        form="settings"
         label="Save changes"
         color="neutral"
         type="submit"
         class="w-fit lg:ms-auto"
+        :loading="isLoading"
+        :disabled="!isFormDirty"
       />
     </UPageCard>
 
