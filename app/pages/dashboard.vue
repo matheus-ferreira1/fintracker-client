@@ -25,7 +25,7 @@ definePageMeta({
     </template>
 
     <template #body>
-      teste
+      dashboard
     </template>
   </UDashboardPanel>
 </template>
