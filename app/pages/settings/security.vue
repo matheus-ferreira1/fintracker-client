@@ -1,25 +1,54 @@
 <script setup lang="ts">
+import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
-import type { FormError } from '@nuxt/ui'
+import type { ApiResponse } from '~/types/api.types'
 
 const passwordSchema = z.object({
-  current: z.string().min(8, 'Must be at least 8 characters'),
-  new: z.string().min(8, 'Must be at least 8 characters')
+  oldPassword: z.string().min(8, 'Must be at least 8 characters'),
+  newPassword: z.string().min(8, 'Must be at least 8 characters')
 })
 
 type PasswordSchema = z.output<typeof passwordSchema>
 
+const toast = useToast()
+
+const isLoading = ref(false)
 const password = reactive<Partial<PasswordSchema>>({
-  current: undefined,
-  new: undefined
+  oldPassword: undefined,
+  newPassword: undefined
 })
 
 const validate = (state: Partial<PasswordSchema>): FormError[] => {
   const errors: FormError[] = []
-  if (state.current && state.new && state.current === state.new) {
+  if (state.oldPassword && state.newPassword && state.oldPassword === state.newPassword) {
     errors.push({ name: 'new', message: 'Passwords must be different' })
   }
   return errors
+}
+
+async function onSubmit(event: FormSubmitEvent<PasswordSchema>) {
+  const { $api } = useNuxtApp()
+  isLoading.value = true
+
+  try {
+    await $api<ApiResponse<undefined>>('/auth/reset-password', {
+      method: 'PUT',
+      body: event.data
+    })
+    toast.add({
+      title: 'Password updated successfully!'
+    })
+    password.oldPassword = undefined
+    password.newPassword = undefined
+  } catch (err) {
+    toast.add({
+      title: 'Something went wrong',
+      description: parseApiError(err),
+      color: 'error'
+    })
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -35,19 +64,20 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
         :state="password"
         :validate="validate"
         class="flex flex-col gap-4 max-w-xs"
+        @submit="onSubmit"
       >
-        <UFormField name="current">
+        <UFormField name="oldPassword">
           <UInput
-            v-model="password.current"
+            v-model="password.oldPassword"
             type="password"
             placeholder="Current password"
             class="w-full"
           />
         </UFormField>
 
-        <UFormField name="new">
+        <UFormField name="newPassword">
           <UInput
-            v-model="password.new"
+            v-model="password.newPassword"
             type="password"
             placeholder="New password"
             class="w-full"
@@ -58,6 +88,7 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
           label="Update"
           class="w-fit"
           type="submit"
+          :loading="isLoading"
         />
       </UForm>
     </UPageCard>
@@ -71,6 +102,7 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
         <UButton
           label="Delete account"
           color="error"
+          disabled
         />
       </template>
     </UPageCard>
