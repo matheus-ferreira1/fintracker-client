@@ -17,8 +17,8 @@ definePageMeta({
 
         <template #right>
           <div class="space-x-2">
-            <TransactionsIncomeModal />
-            <TransactionsExpenseModal />
+            <TransactionsTransactionModal type="income" />
+            <TransactionsTransactionModal type="expense" />
           </div>
         </template>
       </UDashboardNavbar>
