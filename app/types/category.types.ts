@@ -1,19 +1,17 @@
-export type CategoryType = 'income' | 'expense'
-
-export enum CategoryTypeEnum {
+export enum CategoryType {
   INCOME = 'income',
   EXPENSE = 'expense'
 }
 
 export interface Category {
   id: string
-  user_id?: string
   name: string
+  userId?: string
   color: string
   type: CategoryType
-  is_default: boolean
-  created_at?: string
-  updated_at?: string
+  isDefault: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface CreateCategoryInput {
