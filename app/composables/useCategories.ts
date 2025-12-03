@@ -1,11 +1,24 @@
 import type { ApiResponse } from '~/types/api.types'
-import type { Category, CategoryTypeEnum, CreateCategoryInput, UpdateCategoryInput } from '~/types/category.types'
+import type { Category, CategoryType, CreateCategoryInput, UpdateCategoryInput } from '~/types/category.types'
 
-export function useCategories(type: CategoryTypeEnum) {
+export function useCategories(type: CategoryType) {
   const toast = useToast()
   const { $api } = useNuxtApp()
 
   const isMutationLoading = ref(false)
+
+  function fetchCategories() {
+    return useAPI<ApiResponse<Category[]>>(`/categories?type=${type}`, {
+      key: `${type}-categories`
+    })
+  }
+
+  function transformForSelect(categories: Category[]) {
+    return categories.map(cat => ({
+      label: cat.name,
+      value: cat.id
+    }))
+  }
 
   async function createCategory(
     payload: CreateCategoryInput
@@ -87,6 +100,8 @@ export function useCategories(type: CategoryTypeEnum) {
   }
 
   return {
+    fetchCategories,
+    transformForSelect,
     loading: readonly(isMutationLoading),
     createCategory,
     updateCategory,

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import type { Category, CategoryType } from '~/types/category.types'
-import { PREDEFINED_COLORS } from '~/types/category.types'
+import * as z from 'zod'
+import { CategoryType, PREDEFINED_COLORS, type Category } from '~/types/category.types'
 
 interface Props {
   type: CategoryType
@@ -20,7 +19,7 @@ const open = defineModel<boolean>('open', { default: false })
 
 const schema = z.object({
   name: z.string().min(2, 'Category name must be at least 2 characters'),
-  type: z.enum(['income', 'expense']),
+  type: z.enum(CategoryType),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format')
 })
 

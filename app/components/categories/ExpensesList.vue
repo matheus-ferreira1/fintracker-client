@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import type { ApiResponse } from '~/types/api.types'
-import { CategoryTypeEnum, type Category } from '~/types/category.types'
+import { CategoryType, type Category } from '~/types/category.types'
 
-const { createCategory, updateCategory, deleteCategory } = useCategories(CategoryTypeEnum.EXPENSE)
+const {
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory
+} = useCategories(CategoryType.EXPENSE)
 
 const createModalOpen = ref(false)
 const editModalOpen = ref(false)
 const selectedCategory = ref<Category | undefined>()
 
-const { data, pending, error } = useAPI<ApiResponse<Category[]>>(`/categories?type=${CategoryTypeEnum.EXPENSE}`, { key: `${CategoryTypeEnum.EXPENSE}-categories` })
+const { data, pending, error } = await fetchCategories()
 const categories = computed(() => data.value?.data || [])
 
 function openEditModal(category: Category) {
@@ -16,7 +20,7 @@ function openEditModal(category: Category) {
   editModalOpen.value = true
 }
 
-async function handleCreate(name: string, color: string, type: 'income' | 'expense') {
+async function handleCreate(name: string, color: string, type: CategoryType) {
   await createCategory({ name, color, type })
   createModalOpen.value = false
 }
@@ -108,7 +112,7 @@ watch(editModalOpen, (isOpen) => {
 
         <div class="flex items-center gap-2">
           <UBadge
-            v-if="category.is_default"
+            v-if="category.isDefault"
             label="Default"
             color="neutral"
             variant="subtle"
@@ -116,7 +120,7 @@ watch(editModalOpen, (isOpen) => {
           />
 
           <div
-            v-if="!category.is_default"
+            v-if="!category.isDefault"
             class="flex items-center gap-1"
           >
             <UButton
@@ -146,13 +150,13 @@ watch(editModalOpen, (isOpen) => {
 
     <CategoriesCategoryModal
       v-model:open="createModalOpen"
-      type="expense"
+      :type="CategoryType.EXPENSE"
       @submit="handleCreate"
     />
 
     <CategoriesCategoryModal
       v-model:open="editModalOpen"
-      type="expense"
+      :type="CategoryType.EXPENSE"
       :category="selectedCategory"
       @update="handleUpdate"
     />

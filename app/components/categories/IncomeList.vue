@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import type { ApiResponse } from '~/types/api.types'
-import { CategoryTypeEnum, type Category } from '~/types/category.types'
+import { CategoryType, type Category } from '~/types/category.types'
 
-const { createCategory, updateCategory, deleteCategory } = useCategories(CategoryTypeEnum.INCOME)
+const { fetchCategories, createCategory, updateCategory, deleteCategory } = useCategories(CategoryType.INCOME)
 
 const createModalOpen = ref(false)
 const editModalOpen = ref(false)
 const selectedCategory = ref<Category | undefined>()
 
-const { data, pending, error } = useAPI<ApiResponse<Category[]>>(`/categories?type=${CategoryTypeEnum.INCOME}`, { key: `${CategoryTypeEnum.INCOME}-categories` })
+const { data, pending, error } = await fetchCategories()
 const categories = computed(() => data.value?.data || [])
 
 function openEditModal(category: Category) {
@@ -16,7 +15,7 @@ function openEditModal(category: Category) {
   editModalOpen.value = true
 }
 
-async function handleCreate(name: string, color: string, type: 'income' | 'expense') {
+async function handleCreate(name: string, color: string, type: CategoryType) {
   await createCategory({ name, color, type })
   createModalOpen.value = false
 }
@@ -108,7 +107,7 @@ watch(editModalOpen, (isOpen) => {
 
         <div class="flex items-center gap-2">
           <UBadge
-            v-if="category.is_default"
+            v-if="category.isDefault"
             label="Default"
             color="neutral"
             variant="subtle"
@@ -116,7 +115,7 @@ watch(editModalOpen, (isOpen) => {
           />
 
           <div
-            v-if="!category.is_default"
+            v-if="!category.isDefault"
             class="flex items-center gap-1"
           >
             <UButton
@@ -146,13 +145,13 @@ watch(editModalOpen, (isOpen) => {
 
     <CategoriesCategoryModal
       v-model:open="createModalOpen"
-      type="income"
+      :type="CategoryType.INCOME"
       @submit="handleCreate"
     />
 
     <CategoriesCategoryModal
       v-model:open="editModalOpen"
-      type="income"
+      :type="CategoryType.INCOME"
       :category="selectedCategory"
       @update="handleUpdate"
     />
