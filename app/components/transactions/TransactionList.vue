@@ -19,6 +19,9 @@ const toast = useToast()
 
 const now = new Date()
 
+const isDeleteModalOpen = shallowRef(false)
+const selectedTransaction = ref<Transaction | undefined>()
+
 const filters = reactive<TransactionFilters>({
   period: `${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`,
   categoryId: undefined,
@@ -189,7 +192,7 @@ const columns: TableColumn<Transaction>[] = [
           label: 'Delete',
           icon: 'i-lucide-trash-2',
           color: 'error' as const,
-          onSelect: () => handleDelete(row.original)
+          onSelect: () => handleDeleteRequest(row.original)
         }]
       ]
 
@@ -218,8 +221,14 @@ async function handleEdit(transaction: Transaction) {
   // todo
 }
 
-async function handleDelete(transaction: Transaction) {
-  await deleteTransation(transaction.id)
+function handleDeleteRequest(transaction: Transaction) {
+  selectedTransaction.value = transaction
+  isDeleteModalOpen.value = true
+}
+
+async function handleDelete(transactionId: string) {
+  await deleteTransation(transactionId)
+  isDeleteModalOpen.value = false
 }
 </script>
 
@@ -272,7 +281,6 @@ async function handleDelete(transaction: Transaction) {
       </div>
     </div>
 
-    <!-- Transactions Table -->
     <div class="flex-1 overflow-hidden">
       <UTable
         :data="transactions"
@@ -292,5 +300,11 @@ async function handleDelete(transaction: Transaction) {
         :total="paginationData?.totalItems"
       />
     </div>
+
+    <TransactionsDeleteModal
+      v-model:open="isDeleteModalOpen"
+      :transaction="selectedTransaction"
+      @submit="handleDelete"
+    />
   </div>
 </template>
