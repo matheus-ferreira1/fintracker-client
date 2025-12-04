@@ -6,10 +6,10 @@ export enum CategoryType {
 export interface Category {
   id: string
   name: string
-  userId?: string
   color: string
   type: CategoryType
   isDefault: boolean
+  userId?: string
   createdAt?: string
   updatedAt?: string
 }

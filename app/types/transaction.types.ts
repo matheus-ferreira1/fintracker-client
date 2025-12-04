@@ -1,16 +1,22 @@
+import type { Category } from './category.types'
+
 export interface Transaction {
   id: string
-  userId: string
-  categoryId: string
-  categoryName: string
-  categoryColor: string
   amount: number
   description: string
-  date: Date
-  period: string
   isRecurring: boolean
+  date: Date
+  userId: string
+  categoryId: string
   createdAt: Date
   updatedAt: Date
+  category: Category
+}
+
+export interface GetTransactionsResponse {
+  transactions: Transaction[]
+  count: number
+  sum: number
 }
 
 export interface CreateTransactionDTO {
@@ -36,7 +42,8 @@ export interface TransactionFilters {
 }
 
 export interface AvailablePeriod {
+  value: string
   year: number
   month: number
-  transactionCount: number
+  label: string
 }
