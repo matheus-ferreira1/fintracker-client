@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import { CategoryType, type Category } from '~/types/category.types'
+import type { Category, CategoryType } from '~/types/category.types';
 
-const { fetchCategories, createCategory, updateCategory, deleteCategory } = useCategories(CategoryType.INCOME)
+interface Props {
+  type: CategoryType
+}
+
+const props = defineProps<Props>()
+
+const {
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory
+} = useCategories(props.type)
 
 const createModalOpen = ref(false)
 const editModalOpen = ref(false)
@@ -41,7 +52,7 @@ watch(editModalOpen, (isOpen) => {
   <div class="mt-4 space-y-4">
     <div class="flex justify-between items-center">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-        Income Categories
+        {{ `${props.type}s Categories` }}
       </h3>
       <UButton
         label="Add Category"
@@ -81,7 +92,7 @@ watch(editModalOpen, (isOpen) => {
         class="w-12 h-12 mx-auto mb-4 text-gray-400"
       />
       <p class="text-gray-500 dark:text-gray-400 mb-4">
-        No income categories yet
+        No {{ `${props.type}` }} categories yet
       </p>
     </div>
 
@@ -145,13 +156,13 @@ watch(editModalOpen, (isOpen) => {
 
     <CategoriesCategoryModal
       v-model:open="createModalOpen"
-      :type="CategoryType.INCOME"
+      :type="props.type"
       @submit="handleCreate"
     />
 
     <CategoriesCategoryModal
       v-model:open="editModalOpen"
-      :type="CategoryType.INCOME"
+      :type="props.type"
       :category="selectedCategory"
       @update="handleUpdate"
     />

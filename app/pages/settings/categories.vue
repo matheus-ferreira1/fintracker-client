@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CategoryType } from '~/types/category.types';
+
 const items = [
   {
     label: 'Income',
@@ -21,11 +23,11 @@ const items = [
   >
     <UTabs :items="items">
       <template #income>
-        <CategoriesIncomeList />
+        <CategoriesCategoryList :type="CategoryType.INCOME" />
       </template>
 
       <template #expenses>
-        <CategoriesExpensesList />
+        <CategoriesCategoryList :type="CategoryType.EXPENSE" />
       </template>
     </UTabs>
   </UPageCard>
