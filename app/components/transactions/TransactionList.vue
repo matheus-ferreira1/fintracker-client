@@ -15,11 +15,10 @@ const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
-const toast = useToast()
-
 const now = new Date()
 
 const isDeleteModalOpen = shallowRef(false)
+const isEditModalOpen = shallowRef(false)
 const selectedTransaction = ref<Transaction | undefined>()
 
 const filters = reactive<TransactionFilters>({
@@ -213,13 +212,9 @@ const columns: TableColumn<Transaction>[] = [
 
 const { deleteTransation } = useTransactions(props.type)
 
-async function handleEdit(transaction: Transaction) {
-  toast.add({
-    title: 'Edit functionality',
-    description: `Edit ${typeLabelSingular.value}: ${transaction.description}`,
-    color: 'info'
-  })
-  // todo
+function handleEdit(transaction: Transaction) {
+  selectedTransaction.value = transaction
+  isEditModalOpen.value = true
 }
 
 function handleDeleteRequest(transaction: Transaction) {
@@ -306,6 +301,12 @@ async function handleDelete(transactionId: string) {
       v-model:open="isDeleteModalOpen"
       :transaction="selectedTransaction"
       @submit="handleDelete"
+    />
+
+    <TransactionsTransactionModal
+      v-model:open="isEditModalOpen"
+      :type="type"
+      :transaction="selectedTransaction"
     />
   </div>
 </template>

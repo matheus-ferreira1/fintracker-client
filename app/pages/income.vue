@@ -18,7 +18,10 @@ definePageMeta({
         </template>
 
         <template #right>
-          <TransactionsTransactionModal :type="CategoryType.INCOME" />
+          <TransactionsTransactionModal
+            :type="CategoryType.INCOME"
+            :display-trigger-button="true"
+          />
         </template>
       </UDashboardNavbar>
     </template>

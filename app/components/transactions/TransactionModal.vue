@@ -4,10 +4,12 @@ import { CalendarDate } from '@internationalized/date'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
 import { CategoryType } from '~/types/category.types'
-import type { CreateTransactionDTO } from '~/types/transaction.types'
+import type { CreateTransactionDTO, Transaction, UpdateTransactionDTO } from '~/types/transaction.types'
 
 interface Props {
   type: CategoryType
+  transaction?: Transaction
+  displayTriggerButton?: boolean
 }
 
 const props = defineProps<Props>()
@@ -23,13 +25,20 @@ const schema = z.object({
   isRecurring: z.boolean()
 })
 
-const open = ref(false)
+const open = defineModel<boolean>('open', { default: false })
 
 type Schema = z.output<typeof schema>
+
+const isEditMode = computed(() => !!props.transaction)
 
 const getCurrentDate = () => {
   const now = new Date()
   return new CalendarDate(now.getFullYear(), now.getMonth() + 1, now.getDate())
+}
+
+const convertISOToCalendarDate = (isoString: string | Date): DateValue => {
+  const date = new Date(isoString)
+  return new CalendarDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate())
 }
 
 const state = reactive({
@@ -46,19 +55,60 @@ const state = reactive({
   isRecurring: boolean
 }
 
+// Watch for transaction changes to populate form in edit mode
+watch(() => props.transaction, (transaction) => {
+  if (transaction && open.value) {
+    state.amount = transaction.amount
+    state.categoryId = transaction.categoryId
+    state.description = transaction.description
+    state.date = convertISOToCalendarDate(transaction.date)
+    state.isRecurring = transaction.isRecurring
+  }
+}, { immediate: true })
+
+// Reset form when modal closes
+watch(open, (isOpen) => {
+  if (!isOpen && !isEditMode.value) {
+    state.amount = undefined
+    state.categoryId = undefined
+    state.description = ''
+    state.date = getCurrentDate()
+    state.isRecurring = false
+  }
+})
+
 const isExpense = computed(() => props.type === 'expense')
 
-const modalConfig = computed(() => ({
-  title: isExpense.value ? 'Add Expense' : 'Add Income',
-  description: isExpense.value
-    ? 'Enter the details of your expense.'
-    : 'Enter the details of your income.',
-  buttonLabel: isExpense.value ? 'Add Expenses' : 'Add Income',
-  buttonIcon: isExpense.value
-    ? 'material-symbols:trending-down'
-    : 'material-symbols:trending-up',
-  iconColor: isExpense.value ? 'text-red-400' : 'text-green-400'
-}))
+const modalConfig = computed(() => {
+  const baseConfig = {
+    buttonIcon: isExpense.value
+      ? 'material-symbols:trending-down'
+      : 'material-symbols:trending-up',
+    iconColor: isExpense.value ? 'text-red-400' : 'text-green-400'
+  }
+
+  if (isEditMode.value) {
+    return {
+      ...baseConfig,
+      title: isExpense.value ? 'Edit Expense' : 'Edit Income',
+      description: isExpense.value
+        ? 'Update the details of your expense.'
+        : 'Update the details of your income.',
+      buttonLabel: isExpense.value ? 'Edit Expense' : 'Edit Income',
+      submitButtonLabel: 'Update'
+    }
+  }
+
+  return {
+    ...baseConfig,
+    title: isExpense.value ? 'Add Expense' : 'Add Income',
+    description: isExpense.value
+      ? 'Enter the details of your expense.'
+      : 'Enter the details of your income.',
+    buttonLabel: isExpense.value ? 'Add Expenses' : 'Add Income',
+    submitButtonLabel: 'Create'
+  }
+})
 
 const categoryType = isExpense.value ? CategoryType.EXPENSE : CategoryType.INCOME
 const { fetchCategories, transformForSelect } = useCategories(categoryType)
@@ -70,26 +120,41 @@ const categories = computed(() => {
 })
 
 const transactionType = isExpense.value ? CategoryType.EXPENSE : CategoryType.INCOME
-const { createTransation, loading } = useTransactions(transactionType)
+const { createTransation, updateTransation, loading } = useTransactions(transactionType)
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   const dateValue = event.data.date instanceof CalendarDate
     ? event.data.date.toDate('UTC')
     : new Date(event.data.date.year, event.data.date.month - 1, event.data.date.day)
 
-  const payload: CreateTransactionDTO = {
-    amount: event.data.amount,
-    categoryId: event.data.categoryId,
-    description: event.data.description,
-    date: dateValue.toISOString(),
-    isRecurring: event.data.isRecurring
-  }
+  if (isEditMode.value && props.transaction) {
+    // Edit mode
+    const payload: UpdateTransactionDTO = {
+      amount: event.data.amount,
+      categoryId: event.data.categoryId,
+      description: event.data.description,
+      date: dateValue.toISOString(),
+      isRecurring: event.data.isRecurring
+    }
 
-  await createTransation(payload)
+    await updateTransation(props.transaction.id, payload)
+  } else {
+    // Create mode
+    const payload: CreateTransactionDTO = {
+      amount: event.data.amount,
+      categoryId: event.data.categoryId,
+      description: event.data.description,
+      date: dateValue.toISOString(),
+      isRecurring: event.data.isRecurring
+    }
+
+    await createTransation(payload)
+  }
 
   if (!loading.value) {
     open.value = false
 
+    // Reset form state
     state.amount = undefined
     state.categoryId = undefined
     state.description = ''
@@ -106,6 +171,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     :description="modalConfig.description"
   >
     <UButton
+      v-if="!isEditMode && displayTriggerButton"
       :label="modalConfig.buttonLabel"
       variant="subtle"
       :icon="modalConfig.buttonIcon"
@@ -185,7 +251,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             @click="open = false"
           />
           <UButton
-            label="Create"
+            :label="modalConfig.submitButtonLabel"
             color="primary"
             variant="solid"
             type="submit"

@@ -40,7 +40,7 @@ export function useTransactions(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api<ApiResponse<Transaction>>(`/transactions/${type}s/${id}`, {
+      await $api<ApiResponse<Transaction>>(`/transactions/${id}`, {
         method: 'PATCH',
         body: payload,
         async onResponse() {
