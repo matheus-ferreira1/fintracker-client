@@ -136,7 +136,8 @@ const columns: TableColumn<Transaction>[] = [
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: 'numeric'
+        year: 'numeric',
+        timeZone: 'UTC'
       })
     }
   },
