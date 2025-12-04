@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CategoryType } from '~/types/category.types';
+
 definePageMeta({
   middleware: 'auth'
 })
@@ -16,16 +18,13 @@ definePageMeta({
         </template>
 
         <template #right>
-          <div class="space-x-2">
-            <TransactionsTransactionModal type="income" />
-            <TransactionsTransactionModal type="expense" />
-          </div>
+          <TransactionsTransactionModal :type="CategoryType.INCOME" />
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
-      income
+      <TransactionsTransactionList :type="CategoryType.INCOME" />
     </template>
   </UDashboardPanel>
 </template>
