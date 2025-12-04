@@ -16,11 +16,7 @@ export function useTransactions(type: CategoryType) {
         method: 'POST',
         body: payload,
         async onResponse() {
-          await Promise.all([
-            refreshNuxtData(`${type}-transactions`),
-            refreshNuxtData(`expenses-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`),
-            refreshNuxtData(`income-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`)
-          ])
+          await refreshNuxtData(`${type}-transactions`)
         }
       })
 
@@ -48,11 +44,7 @@ export function useTransactions(type: CategoryType) {
         method: 'PATCH',
         body: payload,
         async onResponse() {
-          await Promise.all([
-            refreshNuxtData(`${type}-transactions`),
-            refreshNuxtData(`expenses-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`),
-            refreshNuxtData(`income-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`)
-          ])
+          await refreshNuxtData(`${type}-transactions`)
         }
       })
 
@@ -79,11 +71,7 @@ export function useTransactions(type: CategoryType) {
       await $api(`/transactions/${type}s/${id}`, {
         method: 'DELETE',
         async onResponse() {
-          await Promise.all([
-            refreshNuxtData(`${type}-transactions`),
-            refreshNuxtData(`expenses-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`),
-            refreshNuxtData(`income-${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`)
-          ])
+          await refreshNuxtData(`${type}-transactions`)
         }
       })
 
