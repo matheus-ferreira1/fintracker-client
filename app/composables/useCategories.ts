@@ -9,7 +9,8 @@ export function useCategories(type: CategoryType) {
 
   function fetchCategories() {
     return useAPI<ApiResponse<Category[]>>(`/categories?type=${type}`, {
-      key: `${type}-categories`
+      key: `${type}-categories`,
+      cache: 'default'
     })
   }
 

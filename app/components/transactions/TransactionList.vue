@@ -37,7 +37,7 @@ const query = computed(() => ({
 }))
 
 const { data: transactionsResponse, status: transactionsStatus } = await useAPI<ApiResponse<GetTransactionsResponse>>(
-  '/transactions', { query, key: `${props.type}-transactions` }
+  '/transactions', { query, key: `${props.type}-transactions`, cache: 'default' }
 )
 
 const transactions = computed(() => (transactionsResponse.value?.data.transactions ?? []))
