@@ -22,13 +22,15 @@ const now = new Date()
 const filters = reactive<TransactionFilters>({
   period: `${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`,
   categoryId: undefined,
-  description: undefined
+  description: undefined,
+  page: 1
 })
 
 const query = computed(() => ({
   period: filters.period,
   categoryId: filters.categoryId,
   description: filters.description,
+  page: filters.page,
   type: props.type
 }))
 
@@ -37,10 +39,9 @@ const { data: transactionsResponse, status: transactionsStatus } = await useAPI<
 )
 
 const transactions = computed(() => (transactionsResponse.value?.data.transactions ?? []))
-
 const totalAmount = computed(() => (transactionsResponse.value?.data.sum ?? 0))
-
 const transactionsLength = computed(() => transactionsResponse.value?.data.count)
+const paginationData = computed(() => transactionsResponse.value?.data.pagination)
 
 const { data: periodsData } = await useAPI<ApiResponse<AvailablePeriod[]>>('/transactions/periods', { key: `${props.type}-transactions-periods` })
 
@@ -280,6 +281,15 @@ async function handleDelete(transaction: Transaction) {
         :empty="filters.description || filters.categoryId ? `No ${typeLabelSingular} found matching your filters.` : `No ${typeLabelSingular} for this period.`"
         sticky
         class="h-full"
+      />
+    </div>
+
+    <div class="mx-auto mt-10">
+      <UPagination
+        v-model:page="filters.page"
+        :disabled="transactionsStatus === 'pending'"
+        :items-per-page="paginationData?.itemsPerPage ?? 10"
+        :total="paginationData?.totalItems"
       />
     </div>
   </div>

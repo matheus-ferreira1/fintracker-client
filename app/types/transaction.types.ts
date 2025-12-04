@@ -17,6 +17,7 @@ export interface GetTransactionsResponse {
   transactions: Transaction[]
   count: number
   sum: number
+  pagination: Pagination
 }
 
 export interface CreateTransactionDTO {
@@ -39,6 +40,7 @@ export interface TransactionFilters {
   period?: string
   categoryId?: string
   description?: string
+  page: number
 }
 
 export interface AvailablePeriod {
@@ -46,4 +48,13 @@ export interface AvailablePeriod {
   year: number
   month: number
   label: string
+}
+
+interface Pagination {
+  currentPage: number
+  totalPages: number
+  totalItems: number
+  itemsPerPage: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }
