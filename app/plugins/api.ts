@@ -7,6 +7,15 @@ export default defineNuxtPlugin((nuxtApp) => {
     headers: {
       'Content-Type': 'application/json'
     },
+    onRequest({ options }) {
+      if (import.meta.server) {
+        const { cookie } = useRequestHeaders(['cookie'])
+
+        if (cookie) {
+          options.headers.set('cookie', cookie)
+        }
+      }
+    },
     async onResponseError({ response }) {
       if (response.status === 401) {
         const authStore = useAuthStore()

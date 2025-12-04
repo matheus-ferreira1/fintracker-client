@@ -3,6 +3,10 @@ import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
 import type { ApiResponse } from '~/types/api.types'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const passwordSchema = z.object({
   oldPassword: z.string().min(8, 'Must be at least 8 characters'),
   newPassword: z.string().min(8, 'Must be at least 8 characters')

@@ -4,6 +4,10 @@ import * as z from 'zod'
 import type { ApiResponse } from '~/types/api.types'
 import type { User } from '~/types/user.types'
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const profileSchema = z.object({
   name: z.string().min(2, 'Too short'),
   email: z.email('Invalid email')

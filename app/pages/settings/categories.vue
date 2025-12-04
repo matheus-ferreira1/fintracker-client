@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { CategoryType } from '~/types/category.types';
 
+definePageMeta({
+  middleware: 'auth'
+})
+
 const items = [
   {
     label: 'Income',
