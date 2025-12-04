@@ -68,7 +68,7 @@ export function useTransactions(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api(`/transactions/${type}s/${id}`, {
+      await $api(`/transactions/${id}`, {
         method: 'DELETE',
         async onResponse() {
           await refreshNuxtData(`${type}-transactions`)
