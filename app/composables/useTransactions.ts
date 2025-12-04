@@ -1,7 +1,8 @@
 import type { ApiResponse } from '~/types/api.types'
-import type { CreateTransactionDTO, Transaction, TransactionEnum, UpdateTransactionDTO } from '~/types/transaction.types'
+import type { CategoryType } from '~/types/category.types'
+import type { CreateTransactionDTO, Transaction, UpdateTransactionDTO } from '~/types/transaction.types'
 
-export function useTransactions(type: TransactionEnum) {
+export function useTransactions(type: CategoryType) {
   const toast = useToast()
   const { $api } = useNuxtApp()
 

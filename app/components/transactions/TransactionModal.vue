@@ -3,11 +3,11 @@ import type { DateValue } from '@internationalized/date'
 import { CalendarDate } from '@internationalized/date'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
-import type { Category } from '~/types/category.types'
-import { type CreateTransactionDTO, TransactionEnum, type TransactionType } from '~/types/transaction.types'
+import { CategoryType } from '~/types/category.types'
+import type { CreateTransactionDTO } from '~/types/transaction.types'
 
 interface Props {
-  type: TransactionType
+  type: CategoryType
 }
 
 const props = defineProps<Props>()
@@ -60,18 +60,16 @@ const modalConfig = computed(() => ({
   iconColor: isExpense.value ? 'text-red-400' : 'text-green-400'
 }))
 
-const { data: categories, pending } = await useAPI(`/categories?type=${props.type}`, {
-  key: `${props.type}-categories`,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  transform: (data: any) => {
-    return data?.data?.map((cat: Category) => ({
-      label: cat.name,
-      value: cat.id
-    }))
-  }
+const categoryType = isExpense.value ? CategoryType.EXPENSE : CategoryType.INCOME
+const { fetchCategories, transformForSelect } = useCategories(categoryType)
+const { data: categoriesResponse, pending } = await fetchCategories()
+
+const categories = computed(() => {
+  const categoriesData = categoriesResponse.value?.data || []
+  return transformForSelect(categoriesData)
 })
 
-const transactionType = isExpense.value ? TransactionEnum.EXPENSE : TransactionEnum.INCOME
+const transactionType = isExpense.value ? CategoryType.EXPENSE : CategoryType.INCOME
 const { createTransation, loading } = useTransactions(transactionType)
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -144,7 +142,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             v-model="state.categoryId"
             :loading="pending"
             placeholder="Select a Category"
-            :items="categories || []"
+            :items="categories"
             class="w-full"
           />
         </UFormField>
