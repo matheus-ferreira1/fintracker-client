@@ -1,4 +1,4 @@
-import type { Category } from './category.types'
+import type { Category, CategoryType } from './category.types'
 
 export interface Transaction {
   id: string
@@ -41,6 +41,7 @@ export interface TransactionFilters {
   categoryId?: string
   description?: string
   page: number
+  type: CategoryType
 }
 
 export interface AvailablePeriod {

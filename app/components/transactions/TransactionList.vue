@@ -15,29 +15,40 @@ const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
-const now = new Date()
-
 const isDeleteModalOpen = shallowRef(false)
 const isEditModalOpen = shallowRef(false)
 const selectedTransaction = ref<Transaction | undefined>()
 
+const { data: periodsData, pending: periodsPending } = await useAPI<ApiResponse<AvailablePeriod[]>>('/transactions/periods')
+const availablePeriods = periodsData.value?.data || []
+
+function getFallbackPeriod(): AvailablePeriod {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const date = new Date(year, month - 1, 1)
+  const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+  return {
+    value: `${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`,
+    year,
+    month,
+    label
+  }
+}
+
+const resolvedPeriod = availablePeriods.length > 0 ? availablePeriods[0]?.value : getFallbackPeriod().value
+
 const filters = reactive<TransactionFilters>({
-  period: `${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`,
+  period: resolvedPeriod,
   categoryId: undefined,
   description: undefined,
-  page: 1
+  page: 1,
+  type: props.type
 })
 
-const query = computed(() => ({
-  period: filters.period,
-  categoryId: filters.categoryId,
-  description: filters.description,
-  page: filters.page,
-  type: props.type
-}))
-
-const { data: transactionsResponse, status: transactionsStatus } = await useAPI<ApiResponse<GetTransactionsResponse>>(
-  '/transactions', { query, key: `${props.type}-transactions`, cache: 'default' }
+const { data: transactionsResponse, status: transactionsStatus } = useAPI<ApiResponse<GetTransactionsResponse>>(
+  '/transactions', { query: filters, key: `${props.type}-transactions`, cache: 'default' }
 )
 
 const transactions = computed(() => (transactionsResponse.value?.data.transactions ?? []))
@@ -45,24 +56,14 @@ const totalAmount = computed(() => (transactionsResponse.value?.data.sum ?? 0))
 const transactionsLength = computed(() => transactionsResponse.value?.data.count)
 const paginationData = computed(() => transactionsResponse.value?.data.pagination)
 
-const { data: periodsData } = await useAPI<ApiResponse<AvailablePeriod[]>>('/transactions/periods', { key: `${props.type}-transactions-periods` })
-
-const periodOptions = computed(() => {
-  const periods = periodsData.value?.data || []
-
-  if (!periods.length) {
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1
-    const date = new Date(year, month - 1, 1)
-    const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-
-    return [{
-      value: filters.period,
-      label
-    }]
+const periodOptions = computed<AvailablePeriod[]>(() => {
+  if (!availablePeriods.length) {
+    return [
+      getFallbackPeriod()
+    ]
   }
 
-  return periods
+  return availablePeriods
 })
 
 const { fetchCategories } = useCategories(props.type)
@@ -95,11 +96,11 @@ const selectedCategory = computed({
 
 const selectedPeriodLabel = computed({
   get: () => {
-    const option = periodOptions.value.find(opt => opt.value === filters.period)
+    const option = periodOptions.value.find((opt: AvailablePeriod) => opt.value === filters.period)
     return option?.label || periodOptions.value[0]?.label || ''
   },
   set: (label: string) => {
-    const option = periodOptions.value.find(opt => opt.label === label)
+    const option = periodOptions.value.find((opt: AvailablePeriod) => opt.label === label)
     if (option) {
       filters.period = option.value
     }
@@ -233,7 +234,8 @@ async function handleDelete(transactionId: string) {
     <div class="flex items-center gap-3 pb-5 border-b border-default">
       <USelect
         v-model="selectedPeriodLabel"
-        :items="periodOptions.map(opt => opt.label)"
+        :items="periodOptions.map((opt: AvailablePeriod) => opt.label)"
+        :loading="periodsPending"
         placeholder="Select Period"
         class="w-48"
       />
