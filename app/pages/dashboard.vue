@@ -1,16 +1,17 @@
 <script setup lang="ts">
+import type { ApiResponse } from '~/types/api.types'
 import { CategoryType } from '~/types/category.types'
+import type { DashboardResponse } from '~/types/dashboard.types'
 
 definePageMeta({
   middleware: 'auth'
 })
 
-const { getDashboardData } = useDashboard()
-const { data, pending } = getDashboardData()
+const { data, pending } = useAPI<ApiResponse<DashboardResponse>>('/dashboard')
 </script>
 
 <template>
-  <UDashboardPanel id="home">
+  <UDashboardPanel id="home-dashboard">
     <template #header>
       <UDashboardNavbar
         title="Dashboard"
@@ -50,7 +51,6 @@ const { data, pending } = getDashboardData()
         v-else-if="data?.data"
         class="space-y-6 p-6"
       >
-        <!-- Metric Cards Section -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <DashboardMetricCard
             title="Current Balance"
@@ -77,7 +77,6 @@ const { data, pending } = getDashboardData()
           />
         </div>
 
-        <!-- Charts Section -->
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <DashboardMonthlyComparisonChart
             :months="data.data.monthlyComparison.months"
@@ -89,7 +88,6 @@ const { data, pending } = getDashboardData()
           />
         </div>
 
-        <!-- Next Month Prediction Card -->
         <DashboardNextMonthPrediction
           :prediction="data.data.nextMonthPrediction"
         />
