@@ -39,14 +39,12 @@ const getTrendIcon = (trend: 'up' | 'down' | 'stable'): string => {
 const getBadgeColor = (): 'success' | 'error' | 'neutral' => {
   const { trend } = props.comparison
 
-  // For expenses, down is good (green), up is bad (red)
   if (props.metricType === 'expense') {
     if (trend === 'down') return 'success'
     if (trend === 'up') return 'error'
     return 'neutral'
   }
 
-  // For income and balance, up is good (green), down is bad (red)
   if (trend === 'up') return 'success'
   if (trend === 'down') return 'error'
   return 'neutral'
@@ -60,7 +58,10 @@ const getBadgeColor = (): 'success' | 'error' | 'neutral' => {
         <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">
           {{ title }}
         </h3>
-        <UIcon :name="icon" class="size-5 text-gray-400 dark:text-gray-500" />
+        <UIcon
+          :name="icon"
+          class="size-5 text-gray-400 dark:text-gray-500"
+        />
       </div>
 
       <div class="space-y-2">
@@ -74,7 +75,10 @@ const getBadgeColor = (): 'success' | 'error' | 'neutral' => {
           size="sm"
         >
           <template #leading>
-            <UIcon :name="getTrendIcon(comparison.trend)" class="size-3" />
+            <UIcon
+              :name="getTrendIcon(comparison.trend)"
+              class="size-3"
+            />
           </template>
           {{ formatPercentage(comparison.percentageChange) }} vs last month
         </UBadge>
