@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { MonthlyData } from '~/types/dashboard.types'
-import { VisXYContainer, VisGroupedBar, VisAxis, VisBulletLegend, VisTooltip } from '@unovis/vue'
+import { VisAxis, VisBulletLegend, VisCrosshair, VisGroupedBar, VisTooltip, VisXYContainer } from '@unovis/vue';
+import type { MonthlyData } from '~/types/dashboard.types';
 
 interface Props {
   months: MonthlyData[]
@@ -8,7 +8,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// Format currency helper
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -18,7 +17,6 @@ const formatCurrency = (value: number): string => {
   }).format(value)
 }
 
-// Bar chart configuration
 const barChartX = (_d: MonthlyData, i: number) => i
 const barChartY = [
   (d: MonthlyData) => d.income,
@@ -29,7 +27,9 @@ const barChartLabels = computed<string[]>(() =>
   props.months.map(m => m.label)
 )
 
-const barChartColors = ['#10b981', '#ef4444'] // green for income, red for expenses
+const barChartColors = ['#10b981', '#ef4444']
+
+const template = (d: MonthlyData) => `I: ${formatCurrency(d.income)}, E: ${formatCurrency(d.expenses)}`
 </script>
 
 <template>
@@ -61,6 +61,8 @@ const barChartColors = ['#10b981', '#ef4444'] // green for income, red for expen
           type="y"
           :tick-format="formatCurrency"
         />
+        <VisCrosshair :template="template" />
+        <VisTooltip />
         <VisBulletLegend
           :items="[
             { name: 'Income', color: barChartColors[0] },
