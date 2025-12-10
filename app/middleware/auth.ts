@@ -1,11 +1,7 @@
-export default defineNuxtRouteMiddleware(async (to) => {
-  const authStore = useAuthStore()
+export default defineNuxtRouteMiddleware(() => {
+  const { loggedIn } = useUserSession()
 
-  if (!authStore.isInitialized) {
-    await authStore.initialize()
-  }
-
-  if (!authStore.isAuthenticated) {
+  if (!loggedIn.value) {
     if (import.meta.client) {
       const toast = useToast()
       toast.add({
@@ -13,12 +9,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
         color: 'error'
       })
     }
-
-    return navigateTo({
-      path: '/login',
-      query: {
-        redirect: to.fullPath
-      }
-    }, { external: true })
+    return navigateTo('/login')
   }
 })

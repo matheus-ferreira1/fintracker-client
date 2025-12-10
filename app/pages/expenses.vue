@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { CategoryType } from '~/types/category.types';
-
 definePageMeta({
   middleware: 'auth'
 })

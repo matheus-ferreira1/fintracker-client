@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import type { ApiResponse } from '~/types/api.types'
-import { CategoryType } from '~/types/category.types'
-import type { DashboardResponse } from '~/types/dashboard.types'
-
 definePageMeta({
   middleware: 'auth'
 })

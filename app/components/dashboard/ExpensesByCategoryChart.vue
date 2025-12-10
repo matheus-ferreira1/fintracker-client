@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { CategoryExpense } from '~/types/dashboard.types'
-import { VisSingleContainer, VisDonut, VisBulletLegend, VisTooltip } from '@unovis/vue'
+import { VisBulletLegend, VisDonut, VisSingleContainer, VisTooltip } from '@unovis/vue';
 
 interface Props {
   categories: CategoryExpense[]
   totalExpenses: number
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 // Format currency helper
 const formatCurrency = (value: number): string => {

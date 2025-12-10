@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { PercentageComparison } from '~/types/dashboard.types'
-
 interface Props {
   title: string
   value: number

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import * as z from 'zod'
+import { loginSchema } from '#shared/schemas/login'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type * as z from 'zod'
 
 definePageMeta({
   layout: 'auth',
@@ -12,7 +13,7 @@ useSeoMeta({
   description: 'Login to your account to continue'
 })
 
-const { pending, login } = useAuth()
+const { fetch: refreshSession } = useUserSession()
 
 const fields = [
   {
@@ -31,22 +32,40 @@ const fields = [
   }
 ]
 
-const schema = z.object({
-  email: z.email('Invalid email'),
-  password: z.string().min(8, 'Must be at least 8 characters')
-})
+type Schema = z.output<typeof loginSchema>
 
-type Schema = z.output<typeof schema>
+const pending = shallowRef(false)
 
-function onSubmit(payload: FormSubmitEvent<Schema>) {
-  login(payload.data)
+async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  const toast = useToast()
+  const { $api } = useNuxtApp()
+  pending.value = true
+  try {
+    await $api<ApiResponse<User>>('/api/auth/login', {
+      method: 'POST',
+      body: payload.data
+    })
+    await refreshSession()
+    await navigateTo('/dashboard')
+    toast.add({
+      title: 'Welcome back!'
+    })
+  } catch (err) {
+    toast.add({
+      title: 'Something went wrong',
+      description: parseApiError(err),
+      color: 'error'
+    })
+  } finally {
+    pending.value = false
+  }
 }
 </script>
 
 <template>
   <UAuthForm
     :fields="fields"
-    :schema="schema"
+    :schema="loginSchema"
     title="Welcome back"
     icon="i-lucide-lock"
     :loading="pending"

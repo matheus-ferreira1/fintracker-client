@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { FormSubmitEvent } from '@nuxt/ui'
-import * as z from 'zod'
-import { CategoryType, PREDEFINED_COLORS, type Category } from '~/types/category.types'
+import type { FormSubmitEvent } from '@nuxt/ui';
+import * as z from 'zod';
 
 interface Props {
   type: CategoryType

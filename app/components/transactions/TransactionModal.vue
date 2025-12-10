@@ -3,8 +3,6 @@ import type { DateValue } from '@internationalized/date'
 import { CalendarDate } from '@internationalized/date'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
-import { CategoryType } from '~/types/category.types'
-import type { CreateTransactionDTO, Transaction, UpdateTransactionDTO } from '~/types/transaction.types'
 
 interface Props {
   type: CategoryType

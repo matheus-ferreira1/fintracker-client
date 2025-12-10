@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import type { ApiResponse } from '~/types/api.types'
-import type { LoginPayload, RegisterPayload } from '~/types/auth.types'
-import type { User } from '~/types/user.types'
+import type { ApiResponse } from '~~/shared/types/api.types'
+import type { LoginPayload, RegisterPayload } from '~~/shared/types/auth.types'
+import type { User } from '~~/shared/types/user.types'
 
 interface AuthState {
   user: User | null

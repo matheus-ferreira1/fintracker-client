@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { NextMonthPrediction as NextMonthPredictionType } from '~/types/dashboard.types'
-
 interface Props {
   prediction: NextMonthPredictionType
 }

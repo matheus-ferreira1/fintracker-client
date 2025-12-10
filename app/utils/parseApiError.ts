@@ -1,4 +1,4 @@
-import type { ApiResponse } from '~/types/api.types'
+import type { ApiResponse } from '~~/shared/types/api.types'
 
 export function parseApiError(error: unknown): string {
   if (typeof error === 'object' && error !== null) {

@@ -1,11 +1,7 @@
-export default defineNuxtRouteMiddleware(async () => {
-  const authStore = useAuthStore()
+export default defineNuxtRouteMiddleware(() => {
+  const { loggedIn } = useUserSession()
 
-  if (!authStore.isInitialized) {
-    await authStore.initialize()
-  }
-
-  if (authStore.isAuthenticated) {
+  if (loggedIn.value) {
     if (import.meta.client) {
       const toast = useToast()
       toast.add({

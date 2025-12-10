@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type { DropdownMenuItem } from '@nuxt/ui';
 
 defineProps<{
   collapsed?: boolean
 }>()
 
 const colorMode = useColorMode()
-const { user, userInitials, pending, logout } = useAuth()
 
-const isLoading = computed(() => pending.value || !user.value)
+const { user, clear: clearSession } = useUserSession()
 
 const userDisplay = computed(() => {
   if (!user.value) {
@@ -23,7 +22,7 @@ const userDisplay = computed(() => {
   return {
     name: user.value.name,
     avatar: {
-      text: userInitials.value
+      text: user.value.name
     }
   }
 })
@@ -80,12 +79,13 @@ const items = computed<DropdownMenuItem[][]>(() => [
 ])
 
 const handleLogout = async () => {
-  await logout()
+  await clearSession()
+  await navigateTo('/login')
 }
 </script>
 
 <template>
-  <div v-if="isLoading">
+  <!-- <div v-if="isLoading">
     <div
       v-if="collapsed"
       class="flex items-center justify-center p-2"
@@ -102,10 +102,9 @@ const handleLogout = async () => {
         <USkeleton class="size-4 shrink-0 ml-auto" />
       </div>
     </div>
-  </div>
+  </div> -->
 
   <UDropdownMenu
-    v-else
     :items="items"
     :content="{ align: 'center', collisionPadding: 12 }"
     :ui="{

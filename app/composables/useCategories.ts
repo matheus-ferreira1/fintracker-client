@@ -1,6 +1,3 @@
-import type { ApiResponse } from '~/types/api.types'
-import type { Category, CategoryType, CreateCategoryInput, UpdateCategoryInput } from '~/types/category.types'
-
 export function useCategories(type: CategoryType) {
   const toast = useToast()
   const { $api } = useNuxtApp()

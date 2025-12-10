@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { VisAxis, VisBulletLegend, VisCrosshair, VisGroupedBar, VisTooltip, VisXYContainer } from '@unovis/vue';
-import type { MonthlyData } from '~/types/dashboard.types';
 
 interface Props {
   months: MonthlyData[]

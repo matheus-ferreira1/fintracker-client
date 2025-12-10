@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
-import type { ApiResponse } from '~/types/api.types'
-import type { User } from '~/types/user.types'
 
 definePageMeta({
   middleware: 'auth'

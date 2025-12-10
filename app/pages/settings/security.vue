@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import * as z from 'zod'
-import type { ApiResponse } from '~/types/api.types'
 
 definePageMeta({
   middleware: 'auth'

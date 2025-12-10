@@ -1,5 +1,3 @@
-import type { LoginPayload, RegisterPayload } from '~/types/auth.types'
-
 export function useAuth() {
   const authStore = useAuthStore()
 

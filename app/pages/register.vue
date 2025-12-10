@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import * as z from 'zod'
+import { registerSchema } from '#shared/schemas/register'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type * as z from 'zod'
 
 definePageMeta({
   layout: 'auth',
@@ -12,7 +13,7 @@ useSeoMeta({
   description: 'Create an account to get started'
 })
 
-const { pending, register } = useAuth()
+const { fetch: refreshSession } = useUserSession()
 
 const fields = [
   {
@@ -35,23 +36,40 @@ const fields = [
   }
 ]
 
-const schema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email'),
-  password: z.string().min(8, 'Must be at least 8 characters')
-})
+type Schema = z.output<typeof registerSchema>
 
-type Schema = z.output<typeof schema>
+const pending = shallowRef(false)
 
-function onSubmit(payload: FormSubmitEvent<Schema>) {
-  register(payload.data)
+async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  const toast = useToast()
+  const { $api } = useNuxtApp()
+  pending.value = true
+  try {
+    await $api<ApiResponse<User>>('/api/auth/register', {
+      method: 'POST',
+      body: payload.data
+    })
+    await refreshSession()
+    await navigateTo('/dashboard')
+    toast.add({
+      title: 'Welcome!'
+    })
+  } catch (err) {
+    toast.add({
+      title: 'Something went wrong',
+      description: parseApiError(err),
+      color: 'error'
+    })
+  } finally {
+    pending.value = false
+  }
 }
 </script>
 
 <template>
   <UAuthForm
     :fields="fields"
-    :schema="schema"
+    :schema="registerSchema"
     :loading="pending"
     title="Create an account"
     :submit="{ label: 'Create account' }"

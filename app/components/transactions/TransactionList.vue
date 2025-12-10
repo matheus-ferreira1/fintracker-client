@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui'
-import { h, resolveComponent } from 'vue'
-import type { ApiResponse } from '~/types/api.types'
-import { CategoryType } from '~/types/category.types'
-import type { AvailablePeriod, GetTransactionsResponse, Transaction, TransactionFilters } from '~/types/transaction.types'
+import type { TableColumn } from '@nuxt/ui';
+import { h, resolveComponent } from 'vue';
 
 interface Props {
   type: CategoryType
