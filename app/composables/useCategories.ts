@@ -5,7 +5,7 @@ export function useCategories(type: CategoryType) {
   const isMutationLoading = ref(false)
 
   function fetchCategories() {
-    return useAPI<ApiResponse<Category[]>>(`/categories?type=${type}`, {
+    return useAPI<ApiResponse<Category[]>>(`/api/category/all?type=${type}`, {
       key: `${type}-categories`,
       cache: 'default'
     })
@@ -24,7 +24,7 @@ export function useCategories(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api<ApiResponse<Category>>('/categories', {
+      await $api<ApiResponse<Category>>('/api/category', {
         method: 'POST',
         body: payload,
         async onResponse() {
@@ -52,7 +52,7 @@ export function useCategories(type: CategoryType) {
 
     try {
       const { id, color, name } = data
-      await $api(`/categories/${id}`, {
+      await $api(`/api/category/${id}`, {
         method: 'PATCH',
         body: { color, name },
         async onResponse() {
@@ -77,7 +77,7 @@ export function useCategories(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api(`/categories/${id}`, {
+      await $api(`/api/category/${id}`, {
         method: 'DELETE',
         async onResponse() {
           await refreshNuxtData(`${type}-categories`)
