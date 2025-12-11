@@ -16,7 +16,7 @@ const isDeleteModalOpen = shallowRef(false)
 const isEditModalOpen = shallowRef(false)
 const selectedTransaction = ref<Transaction | undefined>()
 
-const { data: periodsData, pending: periodsPending } = await useAPI<ApiResponse<AvailablePeriod[]>>('/transactions/periods')
+const { data: periodsData, pending: periodsPending } = await useAPI<ApiResponse<AvailablePeriod[]>>('/api/transactions/periods')
 const availablePeriods = periodsData.value?.data || []
 
 function getFallbackPeriod(): AvailablePeriod {
