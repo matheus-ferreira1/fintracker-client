@@ -114,12 +114,12 @@ export const transactionService = {
       year = Number.parseInt(filters.period.substring(2), 10)
     } else {
       const now = new Date()
-      month = now.getMonth() + 1
-      year = now.getFullYear()
+      month = now.getUTCMonth() + 1
+      year = now.getUTCFullYear()
     }
 
-    const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0)
-    const endDate = new Date(year, month, 0, 23, 59, 59, 999)
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0))
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999))
 
     const filterParams = {
       startDate,
@@ -210,8 +210,8 @@ export const transactionService = {
     const results = await transactionRepository.getAvailablePeriods(userId)
 
     return results.map(({ period }) => {
-      const year = period.getFullYear()
-      const month = period.getMonth() + 1
+      const year = period.getUTCFullYear()
+      const month = period.getUTCMonth() + 1
 
       const value = `${String(month).padStart(2, '0')}${year}`
 

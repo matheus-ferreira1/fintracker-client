@@ -87,11 +87,12 @@ export const transactionRepository = {
 
   async getAvailablePeriods(userId: string): Promise<{ period: Date }[]> {
     return prisma.$queryRaw`
-    SELECT DISTINCT DATE_TRUNC('month', t.date) AS period
-    FROM "Transaction" t
-    WHERE t."userId" = ${userId}
-    ORDER BY period DESC
-  `
+      SELECT DISTINCT
+        DATE_TRUNC('month', t.date AT TIME ZONE 'UTC') AS period
+      FROM "Transaction" t
+      WHERE t."userId" = ${userId}
+      ORDER BY period DESC
+    `
   },
 
   async findWithFilters(
