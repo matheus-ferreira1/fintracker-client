@@ -36,12 +36,27 @@ function getFallbackPeriod(): AvailablePeriod {
 
 const resolvedPeriod = availablePeriods.length > 0 ? availablePeriods[0]?.value : getFallbackPeriod().value
 
+const searchInput = ref('')
+
 const filters = reactive<TransactionFilters>({
   period: resolvedPeriod,
   categoryId: undefined,
-  description: undefined,
+  search: undefined,
   page: 1,
   type: props.type
+})
+
+let debounceTimeout: NodeJS.Timeout | null = null
+
+watch(searchInput, (newValue) => {
+  if (debounceTimeout) {
+    clearTimeout(debounceTimeout)
+  }
+
+  debounceTimeout = setTimeout(() => {
+    filters.search = newValue || undefined
+    filters.page = 1
+  }, 500)
 })
 
 const { data: transactionsResponse, status: transactionsStatus } = useAPI<ApiResponse<GetTransactionsResponse>>(
@@ -245,7 +260,7 @@ async function handleDelete(transactionId: string) {
       />
 
       <UInput
-        v-model="filters.description"
+        v-model="searchInput"
         icon="i-lucide-search"
         :placeholder="`Search ${typeLabelSingular}...`"
         class="w-64"
@@ -281,7 +296,7 @@ async function handleDelete(transactionId: string) {
         :data="transactions"
         :columns="columns"
         :loading="transactionsStatus === 'pending'"
-        :empty="filters.description || filters.categoryId ? `No ${typeLabelSingular} found matching your filters.` : `No ${typeLabelSingular} for this period.`"
+        :empty="filters.search || filters.categoryId ? `No ${typeLabelSingular} found matching your filters.` : `No ${typeLabelSingular} for this period.`"
         sticky
         class="h-full"
       />
