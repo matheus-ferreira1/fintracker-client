@@ -9,6 +9,22 @@ const colorMode = useColorMode()
 
 const { user, clear: clearSession } = useUserSession()
 
+const userInitials = computed(() => {
+  if (!user.value?.name) {
+    return ''
+  }
+
+  const nameParts = user.value.name.trim().split(/\s+/).filter(Boolean)
+
+  if (nameParts.length >= 2) {
+    const firstName = nameParts[0]!
+    const lastName = nameParts[nameParts.length - 1]!
+    return `${firstName[0]}${lastName[0]}`.toUpperCase()
+  }
+
+  return user.value.name.substring(0, 2).toUpperCase()
+})
+
 const userDisplay = computed(() => {
   if (!user.value) {
     return {
@@ -22,7 +38,7 @@ const userDisplay = computed(() => {
   return {
     name: user.value.name,
     avatar: {
-      text: user.value.name
+      text: userInitials.value
     }
   }
 })
@@ -85,25 +101,6 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <!-- <div v-if="isLoading">
-    <div
-      v-if="collapsed"
-      class="flex items-center justify-center p-2"
-    >
-      <USkeleton class="size-8 rounded-md" />
-    </div>
-    <div
-      v-else
-      class="flex items-center gap-2 px-2 py-1.5 rounded-md"
-    >
-      <USkeleton class="size-8 rounded-md shrink-0" />
-      <div class="flex-1 flex items-center gap-2 min-w-0">
-        <USkeleton class="h-4 w-24" />
-        <USkeleton class="size-4 shrink-0 ml-auto" />
-      </div>
-    </div>
-  </div> -->
-
   <UDropdownMenu
     :items="items"
     :content="{ align: 'center', collisionPadding: 12 }"
