@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { type CategorySchema, categorySchema } from '#shared/schemas/category';
 import type { FormSubmitEvent } from '@nuxt/ui';
-import * as z from 'zod';
 
 interface Props {
   type: CategoryType
@@ -16,15 +16,7 @@ const emit = defineEmits<{
 
 const open = defineModel<boolean>('open', { default: false })
 
-const schema = z.object({
-  name: z.string().min(2, 'Category name must be at least 2 characters'),
-  type: z.enum(CategoryType),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid color format')
-})
-
-type Schema = z.output<typeof schema>
-
-const state = reactive<Schema>({
+const state = reactive<CategorySchema>({
   name: '',
   type: props.type,
   color: PREDEFINED_COLORS[0]
@@ -61,7 +53,7 @@ const modalDescription = computed(() =>
 )
 const submitButtonLabel = computed(() => isEditMode.value ? 'Update' : 'Create')
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<CategorySchema>) {
   if (isEditMode.value && props.category) {
     emit('update', props.category.id, event.data.name, event.data.color)
   } else {
@@ -84,7 +76,7 @@ function selectColor(color: string) {
   >
     <template #body>
       <UForm
-        :schema="schema"
+        :schema="categorySchema"
         :state="state"
         class="space-y-4"
         @submit="onSubmit"
