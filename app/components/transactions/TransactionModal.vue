@@ -53,7 +53,6 @@ const state = reactive({
   isRecurring: boolean
 }
 
-// Watch for transaction changes to populate form in edit mode
 watch(() => props.transaction, (transaction) => {
   if (transaction && open.value) {
     state.amount = transaction.amount
@@ -64,7 +63,6 @@ watch(() => props.transaction, (transaction) => {
   }
 }, { immediate: true })
 
-// Reset form when modal closes
 watch(open, (isOpen) => {
   if (!isOpen && !isEditMode.value) {
     state.amount = undefined
@@ -126,7 +124,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     : new Date(event.data.date.year, event.data.date.month - 1, event.data.date.day)
 
   if (isEditMode.value && props.transaction) {
-    // Edit mode
     const payload: UpdateTransactionDTO = {
       amount: event.data.amount,
       categoryId: event.data.categoryId,
@@ -137,7 +134,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     await updateTransation(props.transaction.id, payload)
   } else {
-    // Create mode
     const payload: CreateTransactionDTO = {
       amount: event.data.amount,
       categoryId: event.data.categoryId,
@@ -152,7 +148,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   if (!loading.value) {
     open.value = false
 
-    // Reset form state
     state.amount = undefined
     state.categoryId = undefined
     state.description = ''
