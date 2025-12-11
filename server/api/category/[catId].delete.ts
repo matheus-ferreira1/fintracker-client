@@ -5,10 +5,11 @@ export default defineEventHandler(async (event) => {
   const { user } = await requireUserSession(event)
 
   const catId = getRouterParam(event, 'catId')
-  if (!uuidSchema.safeParse(catId) && catId !== undefined) {
+  const { success } = uuidSchema.safeParse(catId)
+  if (!success || !catId) {
     throw createError({
       statusCode: 400,
-      message: 'Invalid category ID'
+      message: 'Invalid transaction ID'
     })
   }
 
