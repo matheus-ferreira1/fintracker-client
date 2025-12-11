@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { Category, CategoryType } from '~/types/category.types';
-
 interface Props {
   type: CategoryType
 }
