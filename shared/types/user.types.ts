@@ -5,3 +5,8 @@ export interface UserDTO {
   created_at?: Date
   updated_at?: Date
 }
+
+export interface UpdateProfileDTO {
+  name?: string
+  email?: string
+}

@@ -1,4 +1,4 @@
-import type { UserDTO } from '~~/shared/types/user.types'
+import type { UpdateProfileDTO } from '~~/shared/types/user.types'
 import { userRepository } from '../repositories/user.repository'
 import { createHashedPassword } from '../utils/password'
 
@@ -43,5 +43,40 @@ export const userService = {
     const { password, ...userWithoutPassword } = user
 
     return userWithoutPassword
+  },
+
+  async update(userId: string,
+    updateData: UpdateProfileDTO
+  ): Promise<UserDTO> {
+    const user = await userRepository.findById(userId)
+    if (!user) {
+      throw createError({
+        statusCode: 404,
+        message: 'User not found'
+      })
+    }
+
+    if (updateData.email && updateData.email !== user.email) {
+      const emailInUse = await userRepository.emailExistsExcludingUser(
+        updateData.email,
+        userId
+      )
+      if (emailInUse) {
+        throw createError({
+          statusCode: 409,
+          message: 'Email already in use'
+        })
+      }
+    }
+
+    const updatedUser = await userRepository.update(userId, updateData)
+    if (!updatedUser) {
+      throw createError({
+        statusCode: 500,
+        message: 'Failed to update profile'
+      })
+    }
+
+    return updatedUser
   }
 }

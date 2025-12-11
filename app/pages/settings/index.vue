@@ -1,35 +1,30 @@
 <script setup lang="ts">
+import type { User } from '#auth-utils'
+import { type ProfileSchema, profileSchema } from '#shared/schemas/profile'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import * as z from 'zod'
 
 definePageMeta({
   middleware: 'auth'
 })
 
-const profileSchema = z.object({
-  name: z.string().min(2, 'Too short'),
-  email: z.email('Invalid email')
-})
+const { user, fetch } = useUserSession()
 
-type ProfileSchema = z.output<typeof profileSchema>
-
-const authStore = useAuthStore()
 const toast = useToast()
 
 const isLoading = ref(false)
 
 const originalProfile = reactive<Partial<ProfileSchema>>({
-  name: authStore.user?.name || '',
-  email: authStore.user?.email || ''
+  name: user.value?.name || '',
+  email: user.value?.email || ''
 })
 
 const profile = reactive<Partial<ProfileSchema>>({
-  name: authStore.user?.name || '',
-  email: authStore.user?.email || ''
+  name: user.value?.name || '',
+  email: user.value?.email || ''
 })
 
 watch(
-  () => authStore.user,
+  () => user.value,
   (newUser) => {
     if (newUser && !profile.name && !profile.email) {
       originalProfile.name = newUser.name
@@ -53,11 +48,11 @@ async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
   isLoading.value = true
 
   try {
-    const user = await $api<ApiResponse<User>>('/auth/profile', {
+    await $api<ApiResponse<User>>('/api/auth/profile', {
       method: 'PATCH',
       body: event.data
     })
-    authStore.setUser(user.data)
+    fetch()
 
     originalProfile.name = event.data.name
     originalProfile.email = event.data.email
