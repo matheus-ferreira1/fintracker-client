@@ -39,7 +39,7 @@ export interface UpdateTransactionDTO {
 export interface TransactionFilters {
   period?: string
   categoryId?: string
-  description?: string
+  search?: string
   page: number
   type: CategoryType
 }
