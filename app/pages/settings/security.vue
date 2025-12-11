@@ -1,17 +1,10 @@
 <script setup lang="ts">
+import { type PasswordSchema, passwordSchema } from '#shared/schemas/password'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import * as z from 'zod'
 
 definePageMeta({
   middleware: 'auth'
 })
-
-const passwordSchema = z.object({
-  oldPassword: z.string().min(8, 'Must be at least 8 characters'),
-  newPassword: z.string().min(8, 'Must be at least 8 characters')
-})
-
-type PasswordSchema = z.output<typeof passwordSchema>
 
 const toast = useToast()
 
@@ -32,9 +25,10 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
 async function onSubmit(event: FormSubmitEvent<PasswordSchema>) {
   const { $api } = useNuxtApp()
   isLoading.value = true
+  console.log('clicou no submit')
 
   try {
-    await $api<ApiResponse<undefined>>('/auth/reset-password', {
+    await $api<ApiResponse<undefined>>('/api/auth/password', {
       method: 'PUT',
       body: event.data
     })

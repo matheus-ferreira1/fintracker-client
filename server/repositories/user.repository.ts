@@ -53,5 +53,15 @@ export const userRepository = {
         password: true
       }
     })
+  },
+
+  async updatePassword(id: string, password: string): Promise<UserDTO | null> {
+    return prisma.user.update({
+      where: { id },
+      data: { password },
+      omit: {
+        password: true
+      }
+    })
   }
 }

@@ -78,5 +78,51 @@ export const userService = {
     }
 
     return updatedUser
+  },
+
+  async resetPassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string
+  ): Promise<void> {
+    const user = await userRepository.findById(userId)
+    if (!user) {
+      throw createError({
+        statusCode: 404,
+        message: 'User not found'
+      })
+    }
+
+    const isOldPasswordValid = await comparePassword(
+      oldPassword,
+      user.password
+    )
+    if (!isOldPasswordValid) {
+      throw createError({
+        statusCode: 400,
+        message: 'Invalid credentials'
+      })
+    }
+
+    const isSamePassword = await comparePassword(newPassword, user.password)
+    if (isSamePassword) {
+      throw createError({
+        statusCode: 400,
+        message: 'New password must be different from current password'
+      })
+    }
+
+    const hashedNewPassword = await createHashedPassword(newPassword)
+
+    const updated = await userRepository.updatePassword(
+      userId,
+      hashedNewPassword
+    )
+    if (!updated) {
+      throw createError({
+        statusCode: 500,
+        message: 'Failed to update password'
+      })
+    }
   }
 }
