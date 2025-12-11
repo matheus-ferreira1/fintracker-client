@@ -15,8 +15,14 @@ export const categoryRepository = {
   },
 
   async findById(id: string, userId: string): Promise<Category | null> {
-    return prisma.category.findUnique({
-      where: { id, userId }
+    return prisma.category.findFirst({
+      where: {
+        id,
+        OR: [
+          { userId },
+          { userId: null }
+        ]
+      }
     })
   },
 

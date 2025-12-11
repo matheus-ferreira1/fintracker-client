@@ -45,7 +45,7 @@ const filters = reactive<TransactionFilters>({
 })
 
 const { data: transactionsResponse, status: transactionsStatus } = useAPI<ApiResponse<GetTransactionsResponse>>(
-  '/transactions', { query: filters, key: `${props.type}-transactions`, cache: 'default' }
+  '/api/transactions', { query: filters, key: `${props.type}-transactions`, cache: 'default' }
 )
 
 const transactions = computed(() => (transactionsResponse.value?.data.transactions ?? []))

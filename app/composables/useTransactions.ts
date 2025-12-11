@@ -8,7 +8,7 @@ export function useTransactions(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api<ApiResponse<Transaction>>('/transactions', {
+      await $api<ApiResponse<Transaction>>('/api/transactions', {
         method: 'POST',
         body: payload,
         async onResponse() {
@@ -36,7 +36,7 @@ export function useTransactions(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api<ApiResponse<Transaction>>(`/transactions/${id}`, {
+      await $api<ApiResponse<Transaction>>(`/api/transactions/${id}`, {
         method: 'PATCH',
         body: payload,
         async onResponse() {
@@ -64,7 +64,7 @@ export function useTransactions(type: CategoryType) {
     isMutationLoading.value = true
 
     try {
-      await $api(`/transactions/${id}`, {
+      await $api<ApiResponse<undefined>>(`/api/transactions/${id}`, {
         method: 'DELETE',
         async onResponse() {
           await refreshNuxtData(`${type}-transactions`)
