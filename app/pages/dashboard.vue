@@ -3,7 +3,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { data, pending } = useAPI<ApiResponse<DashboardResponse>>('/dashboard')
+const { data, pending } = useAPI<ApiResponse<DashboardResponse>>('/api/dashboard')
 </script>
 
 <template>
