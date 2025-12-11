@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
     user
   })
 
+  setResponseStatus(event, 201)
   return {
     status: 'success',
     data: user
