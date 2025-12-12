@@ -33,11 +33,11 @@ export const dashboardService = {
       filters.period
     )
 
-    const currentStartDate = new Date(currentYear, currentMonth - 1, 1, 0, 0, 0, 0)
-    const currentEndDate = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999)
+    const currentStartDate = new Date(Date.UTC(currentYear, currentMonth - 1, 1, 0, 0, 0, 0))
+    const currentEndDate = new Date(Date.UTC(currentYear, currentMonth, 0, 23, 59, 59, 999))
 
-    const previousStartDate = new Date(previousYear, previousMonth - 1, 1, 0, 0, 0, 0)
-    const previousEndDate = new Date(previousYear, previousMonth, 0, 23, 59, 59, 999)
+    const previousStartDate = new Date(Date.UTC(previousYear, previousMonth - 1, 1, 0, 0, 0, 0))
+    const previousEndDate = new Date(Date.UTC(previousYear, previousMonth, 0, 23, 59, 59, 999))
 
     const [
       currentPeriodSummary,
@@ -102,8 +102,8 @@ export const dashboardService = {
       currentYear = Number.parseInt(period.substring(2), 10)
     } else {
       const now = new Date()
-      currentMonth = now.getMonth() + 1
-      currentYear = now.getFullYear()
+      currentMonth = now.getUTCMonth() + 1
+      currentYear = now.getUTCFullYear()
     }
 
     let previousMonth = currentMonth - 1
@@ -178,8 +178,8 @@ export const dashboardService = {
     aggregations: Array<{ month: Date, income: number, expenses: number }>
   ): MonthlyComparison {
     const months: MonthlyData[] = aggregations.map((agg) => {
-      const month = agg.month.getMonth() + 1
-      const year = agg.month.getFullYear()
+      const month = agg.month.getUTCMonth() + 1
+      const year = agg.month.getUTCFullYear()
       const monthName = monthNames[month - 1] || 'Unknown'
 
       return {

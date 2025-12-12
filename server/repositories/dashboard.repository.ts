@@ -66,11 +66,14 @@ export const dashboardRepository = {
     userId: string,
     monthsCount: number = 6
   ): Promise<MonthlyAggregation[]> {
-    const endDate = new Date()
-    const startDate = new Date()
-    startDate.setMonth(startDate.getMonth() - (monthsCount - 1))
-    startDate.setDate(1)
-    startDate.setHours(0, 0, 0, 0)
+    const now = new Date()
+    const currentYear = now.getUTCFullYear()
+    const currentMonth = now.getUTCMonth()
+
+    const endDate = new Date(Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999))
+    const startYear = currentMonth >= monthsCount - 1 ? currentYear : currentYear - 1
+    const startMonth = currentMonth >= monthsCount - 1 ? currentMonth - (monthsCount - 1) : 12 - (monthsCount - 1 - currentMonth)
+    const startDate = new Date(Date.UTC(startYear, startMonth, 1, 0, 0, 0, 0))
 
     const results: Array<{
       month: Date
@@ -78,7 +81,7 @@ export const dashboardRepository = {
       total: number
     }> = await prisma.$queryRaw`
       SELECT
-        DATE_TRUNC('month', t.date) AS month,
+        DATE_TRUNC('month', t.date AT TIME ZONE 'UTC') AS month,
         c.type AS "categoryType",
         COALESCE(SUM(t.amount), 0) AS total
       FROM "Transaction" t
@@ -86,19 +89,19 @@ export const dashboardRepository = {
       WHERE t."userId" = ${userId}
         AND t.date >= ${startDate}
         AND t.date <= ${endDate}
-      GROUP BY DATE_TRUNC('month', t.date), c.type
+      GROUP BY DATE_TRUNC('month', t.date AT TIME ZONE 'UTC'), c.type
       ORDER BY month ASC
     `
 
     const monthlyMap = new Map<string, MonthlyAggregation>()
 
     for (let i = 0; i < monthsCount; i++) {
-      const date = new Date()
-      date.setMonth(date.getMonth() - (monthsCount - 1 - i))
-      date.setDate(1)
-      date.setHours(0, 0, 0, 0)
+      const monthOffset = monthsCount - 1 - i
+      const targetYear = currentMonth >= monthOffset ? currentYear : currentYear - 1
+      const targetMonth = currentMonth >= monthOffset ? currentMonth - monthOffset : 12 - (monthOffset - currentMonth)
+      const date = new Date(Date.UTC(targetYear, targetMonth, 1, 0, 0, 0, 0))
 
-      const key = `${date.getFullYear()}-${date.getMonth()}`
+      const key = `${date.getUTCFullYear()}-${date.getUTCMonth()}`
       monthlyMap.set(key, {
         month: date,
         income: 0,
@@ -108,7 +111,7 @@ export const dashboardRepository = {
 
     for (const result of results) {
       const monthDate = new Date(result.month)
-      const key = `${monthDate.getFullYear()}-${monthDate.getMonth()}`
+      const key = `${monthDate.getUTCFullYear()}-${monthDate.getUTCMonth()}`
       const entry = monthlyMap.get(key)
 
       if (entry) {

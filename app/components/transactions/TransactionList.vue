@@ -21,13 +21,13 @@ const availablePeriods = periodsData.value?.data || []
 
 function getFallbackPeriod(): AvailablePeriod {
   const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth() + 1
-  const date = new Date(year, month - 1, 1)
-  const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  const year = now.getUTCFullYear()
+  const month = now.getUTCMonth() + 1
+  const date = new Date(Date.UTC(year, month - 1, 1))
+  const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
   return {
-    value: `${String(now.getMonth() + 1).padStart(2, '0')}${now.getFullYear()}`,
+    value: `${String(month).padStart(2, '0')}${year}`,
     year,
     month,
     label
